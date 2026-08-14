@@ -5,8 +5,17 @@ from your phone. Two enclosure designs are included:
 
 | Design | Disguise | Coverage | Difficulty | Docs |
 |---|---|---|---|---|
-| **Pencil Pouch** | Black fabric pencil pouch (yours) | ~70° aimable arc | ★ Easiest | [designs/pencil-pouch.md](designs/pencil-pouch.md) |
-| **Bottle Top Module** | ThermoFlask water bottle (yours) | 300° panoramic | ★★ Needs a decent 3D print | [designs/bottle-top.md](designs/bottle-top.md) |
+| **ENV-SENSE Box** ⭐ | "Facilities air-quality sensor" on a shelf across the room | ~90° pan + tilt | ★ Easiest print, strongest disguise | [designs/sense-box.md](designs/sense-box.md) |
+| **Pencil Pouch** | Black fabric pencil pouch (yours) | ~70° aimable arc | ★ Easy | [designs/pencil-pouch.md](designs/pencil-pouch.md) |
+| **Bottle Top Module** | ThermoFlask water bottle (yours) | 300° panoramic | ★★ Needs a well-fitted print | [designs/bottle-top.md](designs/bottle-top.md) |
+
+⭐ **Recommended**: the pouch and bottle imitate your own belongings — the
+objects your coworkers know best, at your seat, with the beam pointing
+back at you. The ENV-SENSE box imitates anonymous office infrastructure
+placed away from you; nobody inspects it and nothing links it to you.
+See [designs/sense-box.md](designs/sense-box.md).
+
+![ENV-SENSE assembly](hardware/sense_assembly.png)
 
 ## Getting the 3D models — no software needed
 

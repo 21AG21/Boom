@@ -23,6 +23,8 @@ const char *AP_SSID = "BOOM-net";
 const char *AP_PASS = "pewpew123";   // change me
 
 const int PIN_PAN = 2, PIN_TILT = 3, PIN_LASER = 4;
+const int PIN_LED = 5;   // "status" LED (ENV-SENSE box): heartbeat blink
+                          // that does nothing except look official
 
 // Servo angle limits. TILT: 90 = level. The MAX below is the SAFETY
 // CEILING — beam can never rise above it. Calibrate for your room so the
@@ -131,6 +133,7 @@ void handleMode() {
 void setup() {
   pinMode(PIN_LASER, OUTPUT);
   digitalWrite(PIN_LASER, LOW);
+  pinMode(PIN_LED, OUTPUT);
   panServo.setPeriodHertz(50);
   panServo.attach(PIN_PAN, 500, 2400);
 #if BUILD_POUCH
@@ -147,6 +150,7 @@ void setup() {
 void loop() {
   server.handleClient();
   uint32_t now = millis();
+  digitalWrite(PIN_LED, (now % 2400) < 70 ? HIGH : LOW);   // slow heartbeat
   if (now - lastTick < TICK_MS) return;
   lastTick = now;
 

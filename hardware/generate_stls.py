@@ -195,6 +195,62 @@ def carriage():
         cuts.append(cyl(1.8, 6, (5 * np.cos(r), 5 * np.sin(r), -8.5)))
     return diff(solid, cuts)
 
+# ================= ENV-SENSE BOX =================
+# "Facilities air-quality sensor" wall/shelf box. Reuses the pouch turret
+# stack (pan servo well + tilt bracket + laser clip). Beam exits a tinted
+# front window; side vents, fake status LED and a label sell the story.
+sb_wall = 2.4
+sb_il, sb_id, sb_ih = 106, 82, 56        # interior L(x) x D(y) x H(z)
+sb_l, sb_d = sb_il + 2 * sb_wall, sb_id + 2 * sb_wall
+sb_floor = 2.4
+win_w, win_h, win_z = 80, 12, 32         # tinted beam window in the front
+well_x = (sb_l - (sv_flange + 4)) / 2    # pan servo well, centered
+well_y = 26 + sb_wall                    # pan axis ~35mm behind front wall
+
+def sense_case():
+    solid = diff(box(sb_l, sb_d, sb_floor + sb_ih),
+                 [box(sb_il, sb_id, sb_ih + 5, (sb_wall, sb_wall, sb_floor))])
+    solid = union([solid,
+                   box(sv_flange + 4, sv_w + 5, sv_well_h,
+                       (well_x, well_y, sb_floor)),
+                   tray(23.5, 19, (8, 8, sb_floor)),                 # ESP32-C3
+                   tray(28, 18, (sb_l - 28 - 11.2, 8, sb_floor)),    # TP4056
+                   tray(50, 34, ((sb_l - 53.2) / 2, sb_d - 37.2 - 3,
+                                 sb_floor))])                        # LiPo
+    cuts = [box(win_w, sb_wall + 2, win_h,
+                ((sb_l - win_w) / 2, -1, win_z))]                    # window
+    led = rot(cyl(5.2, 8), 90, [1, 0, 0])                            # LED hole
+    led.apply_translation([95, 4, 52])
+    cuts.append(led)
+    for z in (44, 48, 52):                                           # side vents
+        cuts.append(box(sb_wall + 2, 30, 2.5, (-1, 25, z)))
+        cuts.append(box(sb_wall + 2, 30, 2.5, (sb_l - sb_wall - 1, 25, z)))
+    for x in (sb_l * 0.3, sb_l * 0.7):                               # keyholes
+        kh = rot(cyl(8, sb_wall + 2), 90, [1, 0, 0])
+        kh.apply_translation([x, sb_d + 1, 36])
+        cuts.append(kh)
+        cuts.append(box(4, sb_wall + 2, 12, (x - 2, sb_d - sb_wall - 1, 36)))
+    cuts.append(box(12, sb_wall + 2, 5,
+                    ((sb_l - 12) / 2, sb_d - sb_wall - 1, sb_floor)))  # USB notch
+    cuts.append(box(60, 0.8, 18, ((sb_l - 60) / 2, -0.01, 8)))       # label recess
+    # servo pocket + flange screws (same pattern as the pouch chassis)
+    cuts.append(box(sv_l, sv_w, sv_well_h + 2,
+                    (well_x + (sv_flange + 4 - sv_l) / 2, well_y + 2.5,
+                     sb_floor - 1)))
+    cxx = well_x + (sv_flange + 4) / 2
+    for dx in (-(sv_flange / 2 - 2), sv_flange / 2 - 2):
+        cuts.append(cyl(2.2, 10, (cxx + dx, well_y + 2.5 + sv_w / 2,
+                                  sb_floor + sv_well_h - 8)))
+    return diff(solid, cuts)
+
+def sense_lid():
+    plate = box(sb_l, sb_d, 2.5)
+    lip = diff(box(sb_il - 0.6, sb_id - 0.6, 4,
+                   (sb_wall + 0.3, sb_wall + 0.3, -4)),
+               [box(sb_il - 5.4, sb_id - 5.4, 6,
+                    (sb_wall + 2.7, sb_wall + 2.7, -5))])
+    return union([plate, lip])
+
 # ================= MOCK COMPONENTS (assembly views only) =================
 def mock_servo(at, upright=True):
     """SG90 body 22.5x11.8x22.7 + shaft."""
@@ -255,6 +311,32 @@ def bottle_assembly():
     sh = shell(); sh.apply_translation([0, 0, 3]);                  parts.append(sh)
     return parts
 
+def sense_assembly():
+    """Case first, lid last (render both translucent for the x-ray)."""
+    parts = [sense_case()]
+    sx = well_x + (sv_flange + 4 - sv_l) / 2 + 0.35
+    sy = well_y + 2.9
+    parts.append(mock_servo((sx, sy, sb_floor + 0.5)))                # pan
+    tb = tilt_bracket()
+    tb.apply_translation([sx - 3, sy - 3, sb_floor + 27.5])
+    parts.append(tb)
+    parts.append(mock_servo((sx, sy - 5, sb_floor + 31), upright=False))
+    lm = mock_laser((0, 0, 0), "x", 34)
+    rot(lm, -90, [0, 0, 1])                                           # aim -Y (front)
+    lm.apply_translation([sb_l / 2, 20, 38])
+    parts.append(lm)
+    parts.append(box(23.5, 19, 4, (9.6, 9.6, sb_floor + 1)))          # ESP32-C3
+    parts.append(box(28, 18, 4, (sb_l - 28 - 9.6, 9.6, sb_floor + 1)))  # TP4056
+    parts.append(box(50, 34, 10, ((sb_l - 50) / 2, sb_d - 35.6 - 3,
+                                  sb_floor + 1)))                     # LiPo
+    green = rot(cyl(5, 6), 90, [1, 0, 0])                             # status LED
+    green.apply_translation([95, 5, 52])
+    parts.append(green)
+    lid = sense_lid()
+    lid.apply_translation([0, 0, sb_floor + sb_ih])
+    parts.append(lid)
+    return parts
+
 # ================= build everything =================
 if __name__ == "__main__":
     save(chassis(), "pouch_chassis")
@@ -263,8 +345,12 @@ if __name__ == "__main__":
     save(shell(), "bottle_shell")
     save(bucket(), "bottle_bucket")
     save(carriage(), "bottle_carriage")
+    save(sense_case(), "sense_case")
+    save(sense_lid(), "sense_lid")
     save(trimesh.util.concatenate(pouch_assembly()), "ASSEMBLED_pouch",
          check=False)
     save(trimesh.util.concatenate(bottle_assembly()), "ASSEMBLED_bottle",
+         check=False)
+    save(trimesh.util.concatenate(sense_assembly()), "ASSEMBLED_sense",
          check=False)
     print("done")

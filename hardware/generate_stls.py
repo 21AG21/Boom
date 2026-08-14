@@ -125,17 +125,22 @@ def laser_clip():
             screw]
     return diff(solid, cuts)
 
-# ================= BOTTLE TOP =================
+# ================= BOTTLE TOP — LOW PROFILE =================
+# The servo sinks into the bottle neck inside a "bucket" so the visible
+# shell is only ~26mm tall (a normal-looking chug cap). z=0 = bottle rim.
 od, wall = BOTTLE_OD, 2.4
-band_h, dome_h = 30, 18
-slot_h, slot_z, spine = 6, 12, 60
-tilt_down, plug_h, fit_tol = 5, 12, 0.4
-top_d = od * 0.66
+band_h, dome_h, cap_t = 16, 8, 2.5     # shell: 16 + 8 + 2.5 ≈ 26mm visible
+slot_h, slot_z, spine = 6, 3.5, 60     # slot in shell-local z
+tilt_down, fit_tol = 5, 0.4
+top_d = od * 0.72
+bucket_depth = 40                       # how far the bucket hangs into the neck
+opening_d = 32                          # rotation opening in the bucket flange
 
 def shell():
+    """Shell-local z: base at 0 (sits on the bucket flange at abs z=3)."""
     outer = union([cyl(od, band_h, sections=128),
                    frustum(od, top_d, dome_h, (0, 0, band_h), sections=128),
-                   cyl(top_d, 3, (0, 0, band_h + dome_h - 0.5), sections=128)])
+                   cyl(top_d, cap_t, (0, 0, band_h + dome_h - 0.5), sections=128)])
     inner = union([cyl(od - 2 * wall, band_h + 1, (0, 0, -1), sections=128),
                    frustum(od - 2 * wall, top_d - 2 * wall, dome_h,
                            (0, 0, band_h), sections=128)])
@@ -143,41 +148,52 @@ def shell():
     slot = diff(cyl(od + 4, slot_h, (0, 0, slot_z), sections=128),
                 [box(od / 2 + 3, half_w * 2, slot_h + 2,
                      (0, -half_w, slot_z - 1))])
-    usb = box(wall + 2, 10, 4, (od / 2 - wall - 1, -5, 3))
-    groove = diff(cyl(od - 2 * wall + 1.6, 2.4, (0, 0, band_h - 4), sections=128),
-                  [cyl(od - 2 * wall - 2, 2.8, (0, 0, band_h - 4.2), sections=128)])
-    return diff(outer, [inner, slot, usb, groove])
+    return diff(outer, [inner, slot])
 
-def bulkhead():
-    d = od - 2 * wall - 0.6
-    lip = diff(cyl(d + 2, 2, (0, 0, 0.3), sections=128),
-               [cyl(d - 2, 2.4, (0, 0, 0.1), sections=128)])
-    solid = union([cyl(d, 3, sections=128), lip])
-    cuts = [box(sv_l, sv_w, 5, (-sv_l + 17.4, -sv_w / 2, -1)),
-            cyl(8, 5, (d / 2 - 8, 0, -1))]
-    for y in (-sv_w / 2 - 4, sv_w / 2 + 4):
-        cuts.append(box(6, 3, 5, (-3, y - 1.5, -1)))
-    return diff(solid, cuts)
+def bucket():
+    """Plug + servo carrier in one part. Flange rests on the bottle rim,
+    stem hangs into the neck, servo stands at the bottom, shaft up."""
+    stem_d = MOUTH_ID - fit_tol
+    solid = union([
+        cyl(od, 3, sections=128),                                  # rim flange
+        # register ring the shell friction-fits over
+        diff(cyl(od - 2 * wall - 0.6, 2, (0, 0, 3), sections=128),
+             [cyl(od - 2 * wall - 7, 2.4, (0, 0, 2.9), sections=128)]),
+        cyl(stem_d, bucket_depth, (0, 0, -bucket_depth), sections=128),
+        frustum(stem_d - 2, stem_d, 2, (0, 0, -bucket_depth), sections=128),
+    ])
+    cuts = [
+        # hollow interior (floor 2.4 stays; flange underside is the ceiling)
+        cyl(stem_d - 2 * wall, bucket_depth - 2.4,
+            (0, 0, -bucket_depth + 2.4), sections=128),
+        # central rotation opening through the flange
+        cyl(opening_d, 6, (0, 0, -1), sections=128),
+        # servo pocket: shaft lands on the center axis
+        box(sv_l, sv_w, 5, (-sv_l + 17.4, -sv_w / 2, -bucket_depth + 5.4)),
+    ]
+    # hollow first, then add the servo mount block on the fresh floor
+    solid = diff(solid, [cuts[0]])
+    solid = union([solid,
+                   box(sv_l + 6, sv_w + 6, 6, (-8.8, -(sv_w + 6) / 2,
+                                               -bucket_depth + 2.4))])
+    return diff(solid, cuts[1:])
 
 def carriage():
-    ring = rot(cyl(laser_d + 4, 12, (0, 0, -6)), 90 + tilt_down, [1, 0, 0])
-    ring.apply_translation([0, -6.5, 14])
-    solid = union([cyl(16, 3), box(4, 3, 18, (-2, -8, 0)), ring])
-    bore = rot(cyl(laser_d, 14, (0, 0, -7)), 90 + tilt_down, [1, 0, 0])
-    bore.apply_translation([0, -6.5, 14])
-    cuts = [bore, cyl(2.4, 5, (0, 0, -1))]
+    """Screws onto the servo horn (~z-8); riser climbs through the flange
+    opening; laser rides just above the flange at slot height, 5° down."""
+    ring = rot(cyl(laser_d + 4, 12, (0, 0, -6)), 90 + tilt_down, [0, 1, 0])
+    ring.apply_translation([17.5, 0, 9.5])
+    solid = union([cyl(16, 2.5, (0, 0, -8)),           # horn plate
+                   box(4, 3, 17, (5.5, -1.5, -8)),     # riser
+                   box(12, 3, 3, (5.5, -1.5, 6)),      # jib out to the laser
+                   ring])
+    bore = rot(cyl(laser_d, 15, (0, 0, -7.5)), 90 + tilt_down, [0, 1, 0])
+    bore.apply_translation([17.5, 0, 9.5])
+    cuts = [bore, cyl(2.4, 6, (0, 0, -8.5))]
     for a in (0, 90, 180, 270):
         r = np.radians(a)
-        cuts.append(cyl(1.8, 5, (5 * np.cos(r), 5 * np.sin(r), -1)))
+        cuts.append(cyl(1.8, 6, (5 * np.cos(r), 5 * np.sin(r), -8.5)))
     return diff(solid, cuts)
-
-def plug():
-    stem_d = MOUTH_ID - fit_tol
-    solid = union([cyl(od, 3, sections=128),
-                   cyl(stem_d, plug_h, (0, 0, -plug_h), sections=128),
-                   frustum(stem_d - 2, stem_d, 2, (0, 0, -plug_h), sections=128)])
-    return diff(solid, [cyl(stem_d - 2 * wall, plug_h + 5,
-                            (0, 0, -plug_h - 1), sections=128)])
 
 # ================= MOCK COMPONENTS (assembly views only) =================
 def mock_servo(at, upright=True):
@@ -221,23 +237,21 @@ def pouch_assembly():
 
 def bottle_assembly():
     """Assembled on a mock bottle top; shell is listed last (render it
-    translucent). z=0 is the bottle rim / plug flange bottom."""
+    translucent). z=0 is the bottle rim."""
     bottle = trimesh.util.concatenate([
         cyl(od, 70, (0, 0, -95), sections=96),
-        frustum(od, 60, 20, (0, 0, -25), sections=96),
-        cyl(60, 5, (0, 0, -5), sections=96)])
-    parts = [bottle, plug()]
-    bh = bulkhead(); bh.apply_translation([0, 0, band_h - 4 + 3]);  parts.append(bh)
-    parts.append(mock_servo((-5.8, -5.9, band_h - 4 + 3 - 23)))     # hangs below
-    ca = carriage(); ca.apply_translation([0, 0, 4.5]);             parts.append(ca)
-    lm = mock_laser((0, -14, 18.5), "x", 30)
-    rot(lm, 90 + tilt_down, [1, 0, 0], point=(0, -14, 18.5))
-    rot(lm, 90, [0, 0, 1], point=(0, 0, 0))
+        frustum(od, MOUTH_ID + 8, 20, (0, 0, -25), sections=96),
+        cyl(MOUTH_ID + 8, 5, (0, 0, -5), sections=96)])
+    parts = [bottle, bucket()]
+    parts.append(mock_servo((-5.65, -5.9, -bucket_depth + 5.4)))   # in the bucket
+    parts.append(carriage())
+    lm = mock_laser((27, 0, 8.7), "x", 18)
+    rot(lm, tilt_down, [0, 1, 0], point=(27, 0, 8.7))
     parts.append(lm)
-    zt = band_h + 2                                                  # dome electronics
-    parts.append(box(30, 20, 5, (-15, -10, zt + 1)))                 # LiPo
-    parts.append(box(22.5, 18, 3, (-24, 12, zt)))                    # ESP32
-    parts.append(box(23, 16, 3, (2, 12, zt)))                        # TP4056
+    # slim electronics standing in the bucket crescents beside the servo
+    parts.append(box(3.5, 22.5, 18, (-20, -11, -bucket_depth + 4)))  # ESP32-C3
+    parts.append(box(4, 30, 12, (16, -15, -bucket_depth + 4)))       # LiPo 401230
+    parts.append(box(23, 3.5, 16, (-11.5, 18, -bucket_depth + 4)))   # TP4056
     sh = shell(); sh.apply_translation([0, 0, 3]);                  parts.append(sh)
     return parts
 
@@ -247,9 +261,8 @@ if __name__ == "__main__":
     save(tilt_bracket(), "pouch_tilt_bracket")
     save(laser_clip(), "laser_clip")
     save(shell(), "bottle_shell")
-    save(bulkhead(), "bottle_bulkhead")
+    save(bucket(), "bottle_bucket")
     save(carriage(), "bottle_carriage")
-    save(plug(), "bottle_plug_ring")
     save(trimesh.util.concatenate(pouch_assembly()), "ASSEMBLED_pouch",
          check=False)
     save(trimesh.util.concatenate(bottle_assembly()), "ASSEMBLED_bottle",

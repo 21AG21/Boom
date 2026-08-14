@@ -29,9 +29,14 @@ The STLs are built with these measurements:
 
 - Pencil case build: **4 × 8 × 3 inch** boxy case (203 × 102 mm interior,
   beam axis 42 mm above the floor)
-- Bottle module: **1.2 L (40 oz) ThermoFlask** — body Ø **92 mm**, mouth
-  opening Ø **54 mm**. Mouth diameter is an estimate: print
-  `bottle_plug_ring` first and test-fit before printing the shell.
+- Bottle module (low-profile v2): **1.2 L (40 oz) ThermoFlask** — body
+  Ø **92 mm**, mouth opening Ø **54 mm**. The mechanism sinks into the
+  bottle neck, so the visible cap is only **~26 mm tall**. Mouth diameter
+  is an estimate — verify the `bottle_bucket` fit before printing the
+  shell.
+
+Note: the pouch build still has an OpenSCAD source (`pouch_chassis.scad`);
+the bottle module's source of truth is `generate_stls.py` only.
 
 If your measurements differ, the models are parametric — regenerate with
 `python3 hardware/generate_stls.py` (edit the numbers at the top; needs

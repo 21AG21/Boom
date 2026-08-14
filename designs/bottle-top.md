@@ -1,88 +1,83 @@
-# Design 2 — The Bottle Top Module ("Boom Flask")
+# Design 2 — The Bottle Top Module ("Boom Flask", low-profile v2)
 
 **Difficulty: moderate — needs a well-fitting print. The cooler build.**
-Your ThermoFlask stays a completely real, functional, water-filled bottle.
-The turret lives in a 3D-printed **fake lid module** that replaces the real
-lid during deployment. Anyone who picks the bottle up feels cold water
-slosh. That's checkmate on suspicion.
+Your 1.2 L ThermoFlask stays a completely real, functional, water-filled
+bottle. The turret lives in a 3D-printed module that replaces the real lid
+during deployment. Anyone who picks the bottle up feels cold water slosh.
+That's checkmate on suspicion.
 
-## Concept
+## v2: the shrunk design
 
-The printed module looks like a chunky matte-black insulated lid — the kind
-half the bottles in any office already have. Between the "lid" dome and its
-base ring runs a **6 mm dark window slot** that reads as a decorative seam.
-Behind that slot, a laser on a rotating carriage covers **300° of the room
-without the bottle ever moving.**
+v1 stacked the whole mechanism *above* the bottle and stood ~53 mm tall —
+conspicuously chunky. v2 sinks the mechanism **into the bottle neck**: the
+Ø54 mm wide mouth comfortably swallows the Ø53.6 mm "bucket" that carries
+the servo, ESP32, charger, and battery. Only the shell shows, and it's now
+**~26 mm tall** — the proportions of a normal chug cap.
 
 ```
-        ┌────────────┐   ← dome: battery + ESP32-C3 + charge board
-        │   ▒▒▒▒▒▒   │
-        ├────────────┤
-        │ ░░░░░░░░░░ │   ← 300° window slot (tinted film) — beam exits here
-        ├────────────┤      inside: pan servo + hanging laser carriage
-        │  ═══╦═══   │   ← plug boss: press-fits into the bottle mouth
-   ╔════╧════╩═══╧════╗
-   ║                  ║  ← your actual ThermoFlask, actually full of water
+      ┌───────────────┐  ← shell dome (~26mm total visible)
+      │░░░░░░░░░░░░░░░│  ← 300° window slot — the laser fires from here
+   ╔══╧═══╤═══════╤═══╧══╗  ← bucket flange sits on the bottle rim
+   ║      │ ┌─┐ ▲ │      ║
+   ║ neck │ │s│ █ │ neck ║  ← bucket hangs into the neck: servo (s),
+   ║      │ └─┘   │      ║    riser █ climbs up to the laser
+   ║      └───────┘      ║
+   ║   ~~~ water ~~~     ║  ← bottle still holds water below
 ```
 
-## Why it works as a disguise
+- The **bucket** press-fits into the mouth like a giant cork. The servo
+  stands on its floor, shaft up, landing exactly on the bottle's center
+  axis. Slim electronics (ESP32-C3, TP4056, a 401230 LiPo) stand in the
+  crescents beside the servo. Water sits below the bucket floor.
+- The **carriage** screws onto the servo horn and climbs through a Ø32 mm
+  opening in the flange; its jib holds the laser just above the flange,
+  right behind the shell's window slot, fixed at **5° downward** — the
+  module physically cannot aim at eye level from table height.
+- The **shell** friction-fits over a register ring on the flange. Lift it
+  off to charge or flip the power switch; press it back on. No visible
+  ports. The 6 mm slot is covered with dark tint film and covers **300°**
+  of the room without the bottle ever moving.
 
-- **The object is real.** Weight, temperature, condensation, slosh — every
-  sense confirms "water bottle." The module only has to survive a glance,
-  and matte black PLA + a plasti-dip coat looks exactly like molded lid
-  plastic.
-- **The window slot** is covered with dark tinted acrylic film (sold as
-  automotive tint; a 5 mW red laser passes through light tint with plenty
-  of punch). From a metre away it's a styling groove.
-- **360°-ish coverage** means you place the bottle once, anywhere on the
-  table, and never touch it again. No aiming behavior to get caught doing.
-- **One servo, fixed downward tilt.** The carriage holds the laser at a
-  fixed ~5° downward angle — mechanically incapable of reaching faces at
-  conference-table height, and one servo is quieter than two. Panning uses
-  slow eased sweeps.
-
-## The parts (see [`hardware/bottle_top.scad`](../hardware/bottle_top.scad))
+## The parts (see [`hardware/generate_stls.py`](../hardware/generate_stls.py))
 
 | Printed part | Job |
 |---|---|
-| **Shell** | Dome + window band, the visible "lid" |
-| **Bulkhead** | Disc that carries the pan servo, shaft pointing down |
-| **Carriage** | Hangs from the servo horn, clips the laser at 5° down |
-| **Plug ring** | Press-fits into the bottle mouth; shell snaps onto it |
+| **bottle_bucket** | Cork + servo carrier; hangs 40 mm into the neck |
+| **bottle_carriage** | Horn plate → riser → jib → laser clip at 5° down |
+| **bottle_shell** | The visible "lid": window band + shallow dome |
 
-Electronics: ESP32-C3 SuperMini + slim 502030 LiPo (250 mAh ≈ a full
-meeting week of patrol duty) + TP4056. The USB-C charge port hides in a
-cutout on the slot's blind spine — the 60° of arc with no window.
+## Critical measurements
 
-## Critical measurements (edit at the top of the .scad)
-
-1. `bottle_od` — outer diameter of your ThermoFlask body at the shoulder
-   (24 oz ThermoFlask ≈ 73 mm — verify with calipers or a paper strip:
-   circumference ÷ π).
-2. `mouth_id` — inner diameter of the bottle mouth (≈ 55 mm on wide-mouth
-   models). The plug ring uses this minus 0.4 mm tolerance; wrap one turn
-   of electrical tape for a snug, removable fit.
-3. Print the plug ring **first, alone** — it's a 20-minute test print that
-   validates both fits before you commit to the 3-hour shell.
+1. `MOUTH_ID` — inner diameter of the bottle mouth. **Default is 54 mm
+   (estimated).** Print the bucket FIRST at 25% height scale (a quick
+   ring) or measure with calipers before committing — the press-fit
+   depends on it. One turn of electrical tape fine-tunes a loose fit.
+2. `BOTTLE_OD` — body diameter at the shoulder (default 92 mm). The shell
+   should match the bottle body so the silhouette reads as one object.
+3. Regenerate after editing: `python3 hardware/generate_stls.py`.
 
 ## Build steps
 
-1. Calibrate: print plug ring, test-fit, adjust tolerance, reprint if needed.
-2. Print shell, bulkhead, carriage (black PLA, 0.2 mm layers, supports on
-   for the shell dome).
-3. Servo into the bulkhead pocket (shaft down through the center hole),
-   carriage onto the horn, laser into the carriage clip.
-4. ESP32 + TP4056 + LiPo foam-taped into the dome cavity; wires down
-   through the bulkhead notch.
-5. Tinted film strip glued inside the window slot.
-6. Bulkhead snaps into the shell; shell onto plug ring; module onto bottle.
-7. Real lid goes in your bag. Swap back after the meeting and take a drink.
+1. Validate the mouth fit (see above), then print all three parts —
+   black PLA, 0.2 mm layers; supports only under the shell dome.
+2. Servo into the bucket-floor pocket (shaft up), foam-tape the ESP32,
+   TP4056 and LiPo into the crescents, wire it up (GPIO2 pan, GPIO4 laser).
+3. Screw the carriage onto the servo horn, clip the laser into the ring,
+   route its two wires down the riser with a spiral of thread or tape —
+   leave slack: the carriage sweeps ~300°.
+4. Glue tint film inside the shell's window slot; press the shell onto
+   the register ring.
+5. Fill the bottle, push the bucket into the mouth, deploy. Real lid goes
+   in your bag; swap back after the meeting.
 
 ## Field notes
 
-- Condensation on a cold bottle can fog the tint film from outside — wipe
-  the slot band when you set it down, or deploy with room-temp water.
 - Park mode points the laser at the blind spine, so even the tint slot
   shows nothing when idle.
-- If someone asks about the chunky lid: "it's a filter cap." Nobody has a
-  follow-up question about a filter cap.
+- Wire slack is the #1 mechanical gotcha: test full sweep before closing
+  the shell. If wires snag, reduce the pan range in the firmware
+  (PAN_MIN/PAN_MAX).
+- Condensation on a cold bottle can fog the tint film — wipe the band
+  when you set it down, or deploy with room-temp water.
+- If someone asks about the cap: "it's a filter lid." Nobody has a
+  follow-up question about a filter lid.

@@ -18,11 +18,20 @@ online print service as-is.
 
 ![All printable parts](hardware/parts_preview.png)
 
-The STLs are built with these default measurements:
+**Assembled views** (`ASSEMBLED_pouch.stl` / `ASSEMBLED_bottle.stl` show
+the whole machine put together — view them in GitHub's 3D viewer; they are
+for visualization, print the individual parts):
 
-- Pouch chassis: fits a pouch interior of **190 × 70 mm**
-- Bottle module: bottle body Ø **73 mm**, mouth opening Ø **55 mm**
-  (typical 24 oz ThermoFlask)
+![Pencil case assembly](hardware/pouch_assembly.png)
+![Bottle assembly](hardware/bottle_assembly.png)
+
+The STLs are built with these measurements:
+
+- Pencil case build: **4 × 8 × 3 inch** boxy case (203 × 102 mm interior,
+  beam axis 42 mm above the floor)
+- Bottle module: **1.2 L (40 oz) ThermoFlask** — body Ø **92 mm**, mouth
+  opening Ø **54 mm**. Mouth diameter is an estimate: print
+  `bottle_plug_ring` first and test-fit before printing the shell.
 
 If your measurements differ, the models are parametric — regenerate with
 `python3 hardware/generate_stls.py` (edit the numbers at the top; needs
@@ -45,9 +54,10 @@ first), but the final compact builds want ~6 solder joints.
 
 ## How it works
 
-The ESP32 creates its own WiFi access point (or joins your phone's hotspot)
-and serves a one-page web joystick. Your phone controls pan/tilt/laser over
-WebSocket. Firmware features planned:
+Firmware lives in [`firmware/boom_turret/`](firmware/boom_turret/) —
+flash it with the Arduino IDE (setup steps in the file header). The ESP32
+creates its own WiFi access point (`BOOM-net`); join it on your phone and
+open `http://192.168.4.1` for the touch joystick. Features:
 
 - Smooth sine-eased motion (no robotic jerks, less servo noise)
 - Auto-patrol mode: slow random drifts with long pauses

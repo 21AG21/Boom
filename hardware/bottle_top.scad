@@ -8,8 +8,8 @@
 // ============================================================
 
 // -------- MEASURE YOUR BOTTLE AND EDIT THESE --------
-bottle_od = 73;    // body outer diameter at the shoulder (24oz ≈ 73)
-mouth_id  = 55;    // bottle mouth inner diameter (wide mouth ≈ 55)
+bottle_od = 92;    // body outer diameter at the shoulder (1.2L/40oz ≈ 92)
+mouth_id  = 54;    // bottle mouth inner diameter (wide mouth ≈ 54)
 
 // -------- part selector: "all", "shell", "bulkhead", "carriage", "plug" --------
 part = "all";

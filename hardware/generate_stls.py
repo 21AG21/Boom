@@ -1,14 +1,28 @@
 #!/usr/bin/env python3
-"""Render Boom turret parts to STL using trimesh + manifold3d.
-Mirrors the geometry in hardware/*.scad with default measurements."""
+"""Render Boom turret parts + assembled models to STL.
+
+Requires: pip install trimesh manifold3d scipy numpy
+Edit the measurements below, run, and fresh STLs land in hardware/stl/.
+"""
 import numpy as np
 import trimesh
 from trimesh.creation import box as _box, cylinder as _cyl
+
+# ================= MEASUREMENTS (edit these) =================
+# Pencil case: 4 x 8 x 3 inch boxy case, interior in mm
+POUCH_L = 203      # interior length  (8")
+POUCH_W = 102      # interior width   (4")
+BEAM_H  = 42       # beam axis height above case floor (case is 76mm tall)
+
+# Bottle: 1.2 L / 40 oz ThermoFlask
+BOTTLE_OD = 92     # body outer diameter at the shoulder
+MOUTH_ID  = 54     # mouth inner diameter — VERIFY with the plug test print!
 
 import os
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stl")
 os.makedirs(OUT, exist_ok=True)
 
+# ---------------- helpers ----------------
 def box(l, w, h, at=(0, 0, 0)):
     b = _box(extents=[l, w, h])
     b.apply_translation([at[0] + l / 2, at[1] + w / 2, at[2] + h / 2])
@@ -35,18 +49,20 @@ def union(ms):
 def diff(base, cuts):
     return trimesh.boolean.difference([base] + cuts, engine="manifold")
 
-def save(mesh, name):
-    assert mesh.is_watertight, f"{name} not watertight"
+def save(mesh, name, check=True):
+    if check:
+        assert mesh.is_watertight, f"{name} not watertight"
     mesh.export(f"{OUT}/{name}.stl")
-    print(f"{name}.stl  vol={mesh.volume/1000:.1f}cm3  tris={len(mesh.faces)}")
+    vol = f"vol={mesh.volume/1000:.1f}cm3" if check else "assembly"
+    print(f"{name}.stl  {vol}  tris={len(mesh.faces)}")
 
 # ================= POUCH CHASSIS =================
-pouch_l, pouch_w = 190, 70          # default pouch interior
-base_l, base_w = pouch_l - 12, pouch_w - 12
+base_l, base_w = POUCH_L - 12, POUCH_W - 12
 base_t, rim_h, rim_t = 3, 12, 2
 laser_d = 6.4
 sv_l, sv_w, sv_well_h = 23.2, 12.6, 17
 sv_flange = 32.5
+well_at = (base_l - sv_flange - 14, (base_w - sv_w - 5) / 2, base_t)
 
 def tray(l, w, at, wall=1.6, h=6):
     return diff(box(l + 2 * wall, w + 2 * wall, h, at),
@@ -62,26 +78,24 @@ def chassis():
     rim = diff(box(base_l, base_w, rim_h),
                [box(base_l - 2 * rim_t, base_w - 2 * rim_t, rim_h + 2,
                     (rim_t, rim_t, -1))])
+    # nose post + alignment ring at beam height (aim out the zipper corner)
+    post = box(4, 14, BEAM_H, (base_l - 4, base_w / 2 - 7, 0))
     nose = rot(cyl(laser_d + 5, 6), 90, [0, 1, 0])
-    nose.apply_translation([base_l - 1 + 3, base_w / 2, base_t + 16])
-    well_at = (base_l - sv_flange - 14, (base_w - sv_w - 5) / 2, base_t)
+    nose.apply_translation([base_l - 1 + 3, base_w / 2, BEAM_H])
     well = box(sv_flange + 4, sv_w + 5, sv_well_h, well_at)
     trays = [tray(52, 35, (6, (base_w - 35) / 2 - 1.6, base_t)),
-             tray(28, 18, (68, 6, base_t)),
-             tray(23.5, 19, (68, base_w - 19 - 10, base_t))]
+             tray(28, 18, (68, 8, base_t)),
+             tray(23.5, 19, (68, base_w - 19 - 12, base_t))]
     clips = [pen_clip((x, base_w - 8, rim_h)) for x in (30, 75, 120)]
-    solid = union([plate, rim, nose, well] + trays + clips)
+    solid = union([plate, rim, post, nose, well] + trays + clips)
 
     cuts = []
-    # washer weight pockets
-    for fx in (0.25, 0.6):
+    for fx in (0.25, 0.6):   # washer weight pockets
         cuts.append(cyl(25.8, 3.6, (base_l * fx, base_w / 2, base_t - 2.6)))
-    # nose beam bore
-    bore = rot(cyl(laser_d + 2, 14), 90, [0, 1, 0])
-    bore.apply_translation([base_l - 3 + 7, base_w / 2, base_t + 16])
+    bore = rot(cyl(laser_d + 2, 16), 90, [0, 1, 0])   # beam bore
+    bore.apply_translation([base_l - 4 + 8, base_w / 2, BEAM_H])
     cuts.append(bore)
-    # servo pocket + flange screw holes
-    cuts.append(box(sv_l, sv_w, sv_well_h + 2,
+    cuts.append(box(sv_l, sv_w, sv_well_h + 2,        # servo pocket
                     (well_at[0] + (sv_flange + 4 - sv_l) / 2,
                      well_at[1] + 2.5, well_at[2] - 1)))
     cx = well_at[0] + (sv_flange + 4) / 2
@@ -111,16 +125,11 @@ def laser_clip():
             screw]
     return diff(solid, cuts)
 
-save(chassis(), "pouch_chassis")
-save(tilt_bracket(), "pouch_tilt_bracket")
-save(laser_clip(), "laser_clip")
-
 # ================= BOTTLE TOP =================
-od, wall = 73, 2.4
+od, wall = BOTTLE_OD, 2.4
 band_h, dome_h = 30, 18
 slot_h, slot_z, spine = 6, 12, 60
 tilt_down, plug_h, fit_tol = 5, 12, 0.4
-mouth_id = 55
 top_d = od * 0.66
 
 def shell():
@@ -130,7 +139,6 @@ def shell():
     inner = union([cyl(od - 2 * wall, band_h + 1, (0, 0, -1), sections=128),
                    frustum(od - 2 * wall, top_d - 2 * wall, dome_h,
                            (0, 0, band_h), sections=128)])
-    # window slot ring, minus the blind spine (spine faces +X)
     half_w = (od / 2 + 2) * np.sin(np.radians(spine / 2))
     slot = diff(cyl(od + 4, slot_h, (0, 0, slot_z), sections=128),
                 [box(od / 2 + 3, half_w * 2, slot_h + 2,
@@ -164,15 +172,86 @@ def carriage():
     return diff(solid, cuts)
 
 def plug():
-    stem_d = mouth_id - fit_tol
+    stem_d = MOUTH_ID - fit_tol
     solid = union([cyl(od, 3, sections=128),
                    cyl(stem_d, plug_h, (0, 0, -plug_h), sections=128),
                    frustum(stem_d - 2, stem_d, 2, (0, 0, -plug_h), sections=128)])
     return diff(solid, [cyl(stem_d - 2 * wall, plug_h + 5,
                             (0, 0, -plug_h - 1), sections=128)])
 
-save(shell(), "bottle_shell")
-save(bulkhead(), "bottle_bulkhead")
-save(carriage(), "bottle_carriage")
-save(plug(), "bottle_plug_ring")
-print("done")
+# ================= MOCK COMPONENTS (assembly views only) =================
+def mock_servo(at, upright=True):
+    """SG90 body 22.5x11.8x22.7 + shaft."""
+    if upright:
+        body = box(22.5, 11.8, 22.7, at)
+        shaft = cyl(4.8, 4, (at[0] + 5.9, at[1] + 5.9, at[2] + 22.7))
+        return trimesh.util.concatenate([body, shaft])
+    body = box(22.5, 22.7, 11.8, at)   # lying on its side
+    shaft = rot(cyl(4.8, 4), 90, [1, 0, 0])
+    shaft.apply_translation([at[0] + 5.9, at[1] - 0.1, at[2] + 5.9])
+    return trimesh.util.concatenate([body, shaft])
+
+def mock_laser(at, along="x", length=28):
+    m = cyl(6, length, (0, 0, -length / 2))
+    if along == "x":
+        rot(m, 90, [0, 1, 0])
+    m.apply_translation(list(at))
+    return m
+
+def pouch_assembly():
+    parts = [chassis()]
+    sx = well_at[0] + (sv_flange + 4 - sv_l) / 2
+    sy = well_at[1] + 2.9
+    parts.append(mock_servo((sx, sy, base_t + 0.5)))                 # pan servo
+    tb = tilt_bracket()
+    tb.apply_translation([sx - 3, sy - 3, base_t + 28])              # bracket on horn
+    parts.append(tb)
+    parts.append(mock_servo((sx, sy - 5, base_t + 31.5), upright=False))
+    parts.append(mock_laser((base_l - 20, base_w / 2, BEAM_H), "x", 44))
+    lc = laser_clip()
+    rot(lc, 90, [0, 1, 0])
+    lc.apply_translation([base_l - 34, base_w / 2, BEAM_H])
+    parts.append(lc)
+    parts.append(box(50, 34, 10, (7.6, (base_w - 34) / 2, base_t + 1)))   # LiPo
+    parts.append(box(28, 18, 4, (69.6, 9.6, base_t + 1)))                 # TP4056
+    parts.append(box(23.5, 19, 4, (69.6, base_w - 19 - 10.4, base_t + 1)))  # ESP32
+    for fx in (0.25, 0.6):
+        parts.append(cyl(25.4, 2.4, (base_l * fx, base_w / 2, base_t - 2.5)))
+    return parts
+
+def bottle_assembly():
+    """Assembled on a mock bottle top; shell is listed last (render it
+    translucent). z=0 is the bottle rim / plug flange bottom."""
+    bottle = trimesh.util.concatenate([
+        cyl(od, 70, (0, 0, -95), sections=96),
+        frustum(od, 60, 20, (0, 0, -25), sections=96),
+        cyl(60, 5, (0, 0, -5), sections=96)])
+    parts = [bottle, plug()]
+    bh = bulkhead(); bh.apply_translation([0, 0, band_h - 4 + 3]);  parts.append(bh)
+    parts.append(mock_servo((-5.8, -5.9, band_h - 4 + 3 - 23)))     # hangs below
+    ca = carriage(); ca.apply_translation([0, 0, 4.5]);             parts.append(ca)
+    lm = mock_laser((0, -14, 18.5), "x", 30)
+    rot(lm, 90 + tilt_down, [1, 0, 0], point=(0, -14, 18.5))
+    rot(lm, 90, [0, 0, 1], point=(0, 0, 0))
+    parts.append(lm)
+    zt = band_h + 2                                                  # dome electronics
+    parts.append(box(30, 20, 5, (-15, -10, zt + 1)))                 # LiPo
+    parts.append(box(22.5, 18, 3, (-24, 12, zt)))                    # ESP32
+    parts.append(box(23, 16, 3, (2, 12, zt)))                        # TP4056
+    sh = shell(); sh.apply_translation([0, 0, 3]);                  parts.append(sh)
+    return parts
+
+# ================= build everything =================
+if __name__ == "__main__":
+    save(chassis(), "pouch_chassis")
+    save(tilt_bracket(), "pouch_tilt_bracket")
+    save(laser_clip(), "laser_clip")
+    save(shell(), "bottle_shell")
+    save(bulkhead(), "bottle_bulkhead")
+    save(carriage(), "bottle_carriage")
+    save(plug(), "bottle_plug_ring")
+    save(trimesh.util.concatenate(pouch_assembly()), "ASSEMBLED_pouch",
+         check=False)
+    save(trimesh.util.concatenate(bottle_assembly()), "ASSEMBLED_bottle",
+         check=False)
+    print("done")

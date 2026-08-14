@@ -7,8 +7,9 @@
 // ============================================================
 
 // -------- MEASURE YOUR POUCH AND EDIT THESE --------
-pouch_inner_l = 190;   // interior length of your pouch (mm)
-pouch_inner_w = 70;    // interior width at the base (mm)
+pouch_inner_l = 203;   // interior length (8" boxy pencil case)
+pouch_inner_w = 102;   // interior width  (4")
+beam_h        = 42;    // beam axis height above the case floor
 
 // -------- part selector: "all", "chassis", "tilt", "clip" --------
 part = "all";
@@ -75,9 +76,10 @@ module chassis() {
         translate([rim_t, rim_t, -1])
           cube([base_l - 2*rim_t, base_w - 2*rim_t, rim_h + 2]);
       }
-      // nose alignment ring: laser's neutral axis exits here.
+      // nose post + alignment ring: laser's neutral axis exits here.
       // Line this ring up with the open zipper corner.
-      translate([base_l - 1, base_w/2, base_t + 16])
+      translate([base_l - 4, base_w/2 - 7, 0]) cube([4, 14, beam_h]);
+      translate([base_l - 1, base_w/2, beam_h])
         rotate([0, 90, 0]) cylinder(d = laser_d + 5, h = 6);
 
       // pan servo well at the nose end
@@ -97,9 +99,9 @@ module chassis() {
     for (x = [base_l * 0.25, base_l * 0.6])
       translate([x, base_w/2, base_t - washer_t])
         cylinder(d = washer_d, h = washer_t + 1);
-    // beam exit through the nose ring
-    translate([base_l - 3, base_w/2, base_t + 16])
-      rotate([0, 90, 0]) cylinder(d = laser_d + 2, h = 10);
+    // beam exit through the nose ring and post
+    translate([base_l - 6, base_w/2, beam_h])
+      rotate([0, 90, 0]) cylinder(d = laser_d + 2, h = 14);
   }
 }
 

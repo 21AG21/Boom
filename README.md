@@ -8,10 +8,26 @@ from your phone. Two enclosure designs are included:
 | **Pencil Pouch** | Black fabric pencil pouch (yours) | ~70° aimable arc | ★ Easiest | [designs/pencil-pouch.md](designs/pencil-pouch.md) |
 | **Bottle Top Module** | ThermoFlask water bottle (yours) | 300° panoramic | ★★ Needs a decent 3D print | [designs/bottle-top.md](designs/bottle-top.md) |
 
-3D-printable models (parametric OpenSCAD) live in [`hardware/`](hardware/).
-Open a `.scad` file in [OpenSCAD](https://openscad.org) (free), tweak the
-measurements at the top to match your actual pouch/bottle, press F6, and
-export STL for printing.
+## Getting the 3D models — no software needed
+
+**Ready-to-print STL files are in [`hardware/stl/`](hardware/stl/).**
+Click any `.stl` file on GitHub and it opens in an interactive 3D viewer
+right in your browser — drag to rotate, scroll to zoom. To print, download
+the file (Download raw file button) and hand it to any 3D printer or
+online print service as-is.
+
+![All printable parts](hardware/parts_preview.png)
+
+The STLs are built with these default measurements:
+
+- Pouch chassis: fits a pouch interior of **190 × 70 mm**
+- Bottle module: bottle body Ø **73 mm**, mouth opening Ø **55 mm**
+  (typical 24 oz ThermoFlask)
+
+If your measurements differ, the models are parametric — regenerate with
+`python3 hardware/generate_stls.py` (edit the numbers at the top; needs
+`pip install trimesh manifold3d scipy numpy`), or use the equivalent
+OpenSCAD sources (`hardware/*.scad`) if you prefer a GUI.
 
 ## Shared electronics (both designs)
 

@@ -13,9 +13,13 @@ toggle the beam. (Light-pattern modes can be added later.)
 - **Phone or laptop app** — a single HTML file with one big on/off button.
 - **Button and app stay in sync** — press the device button and the app
   updates, and vice-versa.
+- **Deep sleep** — idles at ~10 µA and wakes on the button, so a tiny
+  battery lasts months. See [Power & sleep](#power--sleep).
 - **Fail-safe** — the laser turns off by itself if Bluetooth drops.
 
-It's small — roughly a **matchbox**. See [How big it is](#how-big-it-is).
+It's small — a **matchbox** as built, a **thumbnail** in the compact
+build. See [How big it is](#how-big-it-is) and the full shrink plan in
+**[COMPACT.md](COMPACT.md)**.
 
 ```
    phone / laptop                 ESP32-C3              laser diode
@@ -86,17 +90,34 @@ send to the Nordic UART RX characteristic:
 | `L0` | laser off |
 | `T` | toggle |
 
+## Power & sleep
+
+The ESP32-C3 has two states:
+
+- **Awake** — Bluetooth live, button + phone both work (~40–80 mA).
+- **Asleep** — deep sleep, everything off but the button (~10 µA).
+
+It auto-sleeps after **2 minutes** idle (laser off and no phone
+connected). **Press the button to wake it** — that also turns the laser
+on. While asleep the phone can't see it, so press the button first, then
+Connect. This is what lets a ~100 mAh cell last months of standby instead
+of an hour. Adjust the timeout via `SLEEP_AFTER_MS` in the `.ino`.
+
 ## How big it is
 
 - **ESP32-C3 SuperMini:** ~22 × 18 × 3 mm
-- **KY-008 laser:** ~15 × 24 mm board, 6 mm tube
-- **Button:** ~6–12 mm
+- **KY-008 laser:** ~15 × 24 mm board, 6 mm tube (or a bare 6 mm diode)
+- **Button:** ~2–12 mm
 
-On a breadboard it's dominated by the breadboard. Tidied into a little
-case with a small LiPo, the whole thing is about **40 × 25 × 18 mm — a
-matchbox**, or smaller if you skip the battery and run it off USB. Want a
-printed matchbox-size case (beam window + button hole + USB-C notch)? Ask
-and I'll add it to [`../hardware/generate_stls.py`](../hardware/generate_stls.py).
+As built (SuperMini + KY-008 board + LiPo) it tidies to about **40 × 25 ×
+18 mm — a matchbox**. The **compact build** (bare diode, SMD button, coin/
+slim cell) shrinks to about **24 × 20 × 10 mm — a thumbnail**; the full
+shrink ladder, runtime math, and charging options are in
+**[COMPACT.md](COMPACT.md)**.
+
+Want a printed case (beam hole + button hole + USB-C notch, matchbox or
+thumbnail size)? Ask and I'll add it to
+[`../hardware/generate_stls.py`](../hardware/generate_stls.py).
 
 ## Safety
 

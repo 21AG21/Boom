@@ -26,6 +26,22 @@ unit.
 |---|---|---|---|
 | Green LED + 220Ω resistor | "5mm green LED" / "220 ohm resistor" | ~$0 | Status light (on = laser on). The build works fine without it. |
 
+## Compact build (Tier B — thumbnail size)
+
+Swaps for shrinking it down; see [COMPACT.md](COMPACT.md) for the full
+plan, sizes, and deep-sleep runtime math.
+
+| Part | Search | ~Price | Notes |
+|---|---|---|---|
+| **Bare 6 mm laser diode** | "6mm 650nm 5mW laser diode module" | $1 | Replaces the KY-008 board. **Add a ~100 Ω resistor** in series (the KY-008 had one built in). |
+| **~100 Ω resistor** | "100 ohm resistor" | ~$0 | In series with the bare diode — don't skip it. |
+| **SMD tactile button** | "2x4mm SMD tactile switch" | ~$0 | Tiny replacement for the through-hole button. |
+| **100 mAh slim LiPo** *or* **LIR2032 coin + holder** | "401220 lipo 100mah" / "LIR2032 rechargeable + holder" | $3–5 | LiPo = best runtime; coin = flattest. Both feed the 3.7 V board directly, no booster. |
+| **TP4056 USB-C** (if recharging in place) | "TP4056 Type-C" | $1 | ~26 × 17 mm, so it sits beside the MCU. Skip it and swap/charge the cell externally to stay smallest. |
+
+Deep sleep (~10 µA idle) is already in the firmware, so even the little
+coin cell lasts months of standby.
+
 ## If you want it cordless (optional, later)
 
 | Part | Search | ~Price | Notes |

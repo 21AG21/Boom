@@ -1,14 +1,21 @@
 /*
- * LASER-POINTER — Bluetooth remote laser, on/off only
+ * LASER-POINTER — Bluetooth remote laser, on/off + deep sleep
  * ------------------------------------------------------------------
- * A tiny fixed laser you switch on and off two ways:
- *   1. a physical button on the device, and
- *   2. your phone / computer over Bluetooth.
- * No motors, no aiming, no patterns (those can come later) — you point
- * the whole gadget where you want the dot and toggle the beam.
+ * A tiny fixed laser you switch on/off from a physical button and from
+ * your phone/laptop over Bluetooth. No motors, no patterns yet.
+ *
+ * POWER / SLEEP (the important part for the compact build):
+ *   The ESP32-C3 has two states.
+ *     AWAKE  — Bluetooth is live, button + phone both work. ~40-80 mA.
+ *     ASLEEP — deep sleep, everything off but the button. ~10 uA.
+ *   It auto-sleeps after SLEEP_AFTER_MS of being idle (laser off AND no
+ *   phone connected). Pressing the button WAKES it and turns the laser
+ *   on in one action. While asleep the phone can't reach it — press the
+ *   button once to wake it, then connect. This is what lets a ~100 mAh
+ *   cell last months of standby instead of an hour.
  *
  * The ESP32-C3 does Bluetooth Low Energy (BLE), not classic Bluetooth —
- * so the phone side is any "BLE UART" app or the included web app.
+ * the phone side is any "BLE UART" app or the included web app.
  *
  * Arduino IDE setup:
  *   1. Boards manager: install "esp32" (Espressif), pick "ESP32C3 Dev Module"
@@ -19,17 +26,22 @@
  *   L1  laser on      L0  laser off      T  toggle
  *
  * Wiring (the whole circuit):
- *   GPIO4  -> laser module signal (KY-008 "S" pin)
- *   GND    -> laser "-" pin  ·  button leg  ·  (optional LED -)
- *   GPIO10 -> button -> GND      (internal pull-up; no resistor needed)
+ *   GPIO4  -> laser diode signal (KY-008 "S" pin, or a bare 6mm diode +)
+ *   GND    -> laser "-"  ·  button leg  ·  (optional LED -)
+ *   GPIO10 -> button -> GND      (internal pull-up; also the wake pin)
  *   GPIO5  -> status LED (optional, via 220Ohm to GND)
- *   5V/USB -> powers the board
+ *   3V3/battery or USB -> powers the board
+ *
+ * NOTE: the wake button MUST be on an RTC-capable pin. GPIO10 works on
+ * the ESP32-C3. If you move it, pick another GPIO the C3 can wake from.
  *
  * SAFETY: even a 5mW class-3R laser must never hit an eye. Aim the unit
  * so the dot lands on the floor / low walls, never at people, pets'
  * faces, mirrors, or glass.
  */
 #include <NimBLEDevice.h>
+#include "esp_sleep.h"
+#include "driver/gpio.h"
 
 // ---------------- config ----------------
 const char *BLE_NAME = "LASER-PT";
@@ -39,14 +51,21 @@ const char *BLE_NAME = "LASER-PT";
 #define NUS_RX        "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"  // phone -> device
 #define NUS_TX        "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"  // device -> phone
 
-const int PIN_LASER = 4;                  // KY-008 signal
+const int PIN_LASER = 4;                  // laser signal
 const int PIN_LED   = 5;                  // status LED (optional)
-const int PIN_BTN   = 10;                 // momentary button to GND
+const int PIN_BTN   = 10;                 // momentary button to GND + wake pin
+
+// Go to deep sleep after this long idle (laser off AND no phone connected).
+const uint32_t SLEEP_AFTER_MS = 120000;   // 2 minutes
 
 // ---------------- state ----------------
 NimBLECharacteristic *txChar = nullptr;
 volatile bool connected = false;
 bool laserOn = false;
+uint32_t lastActivity = 0;                // millis() of the last thing we did
+bool consumeRelease = false;              // swallow the release of the wake-press
+
+void touch() { lastActivity = millis(); } // "something happened, stay awake"
 
 void applyLaser() { digitalWrite(PIN_LASER, laserOn ? HIGH : LOW); }
 
@@ -57,7 +76,21 @@ void notify(const char *s) {
 void setLaser(bool on) {
   laserOn = on;
   applyLaser();
-  notify(on ? "on\n" : "off\n");     // lets the app reflect button presses
+  touch();
+  notify(on ? "on\n" : "off\n");          // lets the app mirror button presses
+}
+
+// ---------------- deep sleep ----------------
+void goToSleep() {
+  digitalWrite(PIN_LASER, LOW);
+  digitalWrite(PIN_LED, LOW);
+  // keep the pull-up on the button alive through deep sleep, then wake
+  // when the button pulls the pin LOW.
+  gpio_set_direction((gpio_num_t)PIN_BTN, GPIO_MODE_INPUT);
+  gpio_pullup_en((gpio_num_t)PIN_BTN);
+  gpio_pulldown_dis((gpio_num_t)PIN_BTN);
+  esp_deep_sleep_enable_gpio_wakeup(1ULL << PIN_BTN, ESP_GPIO_WAKEUP_GPIO_LOW);
+  esp_deep_sleep_start();                 // chip halts here; wakes via full reboot
 }
 
 // ---------------- physical button ----------------
@@ -71,6 +104,7 @@ void serviceButton() {
     btnDown = true; btnSince = now;
   } else if (!pressed && btnDown) {              // released
     btnDown = false;
+    if (consumeRelease) { consumeRelease = false; touch(); return; }  // wake-press
     if (now - btnSince > 30) setLaser(!laserOn); // debounced toggle
   }
 }
@@ -79,6 +113,7 @@ void serviceButton() {
 void handleLine(String cmd) {
   cmd.trim();
   if (cmd.length() == 0) return;
+  touch();
   char c = toupper(cmd.charAt(0));
   switch (c) {
     case 'L': setLaser(cmd.substring(1).toInt() == 1); break;  // L1 / L0
@@ -90,7 +125,7 @@ void handleLine(String cmd) {
 
 // ---------------- BLE callbacks ----------------
 class ServerCB : public NimBLEServerCallbacks {
-  void onConnect(NimBLEServer *, NimBLEConnInfo &) override { connected = true; }
+  void onConnect(NimBLEServer *, NimBLEConnInfo &) override { connected = true; touch(); }
   void onDisconnect(NimBLEServer *s, NimBLEConnInfo &, int) override {
     connected = false;
     setLaser(false);                    // fail safe: laser off if phone drops
@@ -117,6 +152,17 @@ void setup() {
   pinMode(PIN_LED, OUTPUT);
   pinMode(PIN_BTN, INPUT_PULLUP);
 
+  // If we woke because the button was pressed, treat it as "turn on":
+  // light the laser now and swallow the button's release so it doesn't
+  // immediately toggle back off.
+  if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_GPIO) {
+    laserOn = true;
+    consumeRelease = true;
+    btnDown = true;
+    btnSince = millis();
+  }
+  applyLaser();
+
   NimBLEDevice::init(BLE_NAME);
   NimBLEServer *server = NimBLEDevice::createServer();
   server->setCallbacks(new ServerCB());
@@ -132,12 +178,21 @@ void setup() {
   adv->addServiceUUID(NUS_SERVICE);
   adv->setName(BLE_NAME);
   NimBLEDevice::startAdvertising();
+
+  touch();
 }
 
 void loop() {
   serviceButton();
-  // status LED: solid while the laser is on, slow heartbeat when idle
   uint32_t now = millis();
+
+  // status LED: solid while the laser is on, slow heartbeat when idle
   digitalWrite(PIN_LED, laserOn ? HIGH : ((now % 2400) < 70 ? HIGH : LOW));
+
+  // auto-sleep when there's nothing to stay awake for
+  if (!laserOn && !connected && now - lastActivity > SLEEP_AFTER_MS) {
+    goToSleep();
+  }
+
   delay(5);
 }

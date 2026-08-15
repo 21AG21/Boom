@@ -2,103 +2,83 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Laser Pointer Remote</title>
+<title>Laser Remote</title>
 <!--
-  Laser Pointer Remote — Web Bluetooth control app
+  Laser Remote — Web Bluetooth on/off control
   ------------------------------------------------------------------
-  Talks to the LASER-PT firmware over BLE (Nordic UART Service). Just
-  open this file in a browser and hit Connect. Nothing to install.
+  Talks to the LASER-PT firmware over BLE (Nordic UART Service). Open
+  this file in a browser and hit Connect, then tap the big button to
+  turn the laser on/off. Nothing to install.
 
-  Works in: Chrome / Edge on desktop (Win/Mac/Linux) and Chrome on
-  Android. Web Bluetooth is NOT supported by Safari / iOS Chrome — on
-  an iPhone/iPad use the "Bluefy" browser app instead, or the nRF
-  Connect app with the commands from the firmware header.
+  Works in: Chrome / Edge on a laptop/desktop (Win/Mac/Linux) and Chrome
+  on Android. Web Bluetooth is NOT supported by Safari / iOS Chrome — on
+  an iPhone/iPad use the free "Bluefy" browser app instead, or the nRF
+  Connect app with the commands in the firmware header.
 
-  Must be opened over https:// or from a local file:// — some browsers
-  only expose Web Bluetooth in a "secure context". Opening the saved
-  file directly (file://) works in Chrome desktop; on Android, host it
-  (e.g. GitHub Pages) or use a local server.
+  The device's physical button also toggles the laser; when it does, this
+  page updates to match (it listens for the firmware's on/off messages).
 -->
 <style>
- :root{
-   --bg:#0f1115; --panel:#181b22; --line:#2a2f3a; --fg:#e8eaed;
-   --accent:#2f6db4; --hot:#e03131; --hotdim:#7a1f1f; --ok:#2f9e44;
- }
+ :root{ --bg:#0f1115; --fg:#e8eaed; --accent:#2f6db4; --line:#2a2f3a;
+        --hot:#e03131; --ok:#2f9e44; }
  *{box-sizing:border-box}
  body{margin:0;background:var(--bg);color:var(--fg);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      display:flex;flex-direction:column;align-items:center;gap:14px;
-      padding:16px;min-height:100vh;touch-action:manipulation}
- h1{font-size:18px;margin:2px 0 0;font-weight:650;letter-spacing:.02em}
+      display:flex;flex-direction:column;align-items:center;gap:22px;
+      padding:28px 16px;min-height:100vh;touch-action:manipulation}
+ h1{font-size:18px;margin:0;font-weight:650;letter-spacing:.02em}
  #status{font-size:13px;color:#9aa0aa;min-height:18px}
  #status.on{color:var(--ok)}
- #pad{width:min(82vw,340px);aspect-ratio:1;background:var(--panel);
-      border:2px solid var(--line);border-radius:18px;position:relative;
-      touch-action:none;overflow:hidden}
- #pad .cross{position:absolute;background:var(--line)}
- #pad .cross.h{left:0;right:0;top:50%;height:1px}
- #pad .cross.v{top:0;bottom:0;left:50%;width:1px}
- #dot{width:38px;height:38px;background:var(--hot);border-radius:50%;
-      position:absolute;left:calc(50% - 19px);top:calc(50% - 19px);
-      box-shadow:0 0 16px rgba(224,49,49,.6);transition:opacity .15s}
- #dot.laseroff{background:#555;box-shadow:none}
- .row{display:flex;gap:12px;width:min(82vw,340px)}
- button{flex:1;font-size:16px;padding:14px 10px;border-radius:12px;border:0;
-        background:#242833;color:var(--fg);font-weight:600;cursor:pointer}
- button:active{transform:translateY(1px)}
- button.on{background:var(--accent)}
- button.laser.on{background:var(--hot)}
- #connect{background:var(--accent)}
+ #connect{font-size:16px;padding:14px 22px;border-radius:12px;border:0;
+          background:var(--accent);color:var(--fg);font-weight:600;cursor:pointer;
+          width:min(86vw,320px)}
  #connect.connected{background:#242833}
- #off{background:var(--hotdim);font-size:18px;width:min(82vw,340px)}
+ #connect:active{transform:translateY(1px)}
+ #power{width:min(66vw,230px);aspect-ratio:1;border-radius:50%;cursor:pointer;
+        background:#242833;border:3px solid var(--line);color:var(--fg);
+        font-size:26px;font-weight:700;display:flex;align-items:center;
+        justify-content:center;flex-direction:column;gap:8px}
+ #power:disabled{opacity:.4;cursor:default}
+ #power.on{background:var(--hot);border-color:#ff6b6b;
+           box-shadow:0 0 46px rgba(224,49,49,.55)}
+ #power .sub{font-size:13px;font-weight:500;opacity:.85}
+ #power:active:not(:disabled){transform:translateY(1px)}
  .hint{font-size:12px;color:#7a808c;max-width:340px;text-align:center;line-height:1.5}
  code{background:#242833;padding:1px 5px;border-radius:4px}
 </style>
 
-<h1>Laser Pointer Remote</h1>
+<h1>Laser Remote</h1>
 <div id="status">Not connected</div>
-
 <button id="connect">Connect</button>
 
-<div id="pad">
-  <div class="cross h"></div><div class="cross v"></div>
-  <div id="dot" class="laseroff"></div>
-</div>
-
-<div class="row">
-  <button id="laser" class="laser">Laser</button>
-  <button id="patrol">Patrol</button>
-  <button id="center">Center</button>
-</div>
-
-<button id="off">LASER OFF + PARK</button>
+<button id="power" disabled><span id="plabel">OFF</span><span class="sub">tap to toggle</span></button>
 
 <div class="hint">
-  Drag inside the pad to aim. On a phone use Chrome (Android) or Bluefy
-  (iOS). Desktop: Chrome or Edge. If <code>Connect</code> does nothing,
-  your browser doesn't support Web Bluetooth — see the file header.
+  Aim the gadget itself where you want the dot. On a laptop use Chrome or
+  Edge; on Android use Chrome; on iPhone use the <code>Bluefy</code>
+  browser. The device's own button toggles it too.
 </div>
 
 <script>
-// Nordic UART Service UUIDs (must match the firmware)
-const NUS  = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-const NUS_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; // write (phone -> device)
-const NUS_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // notify (device -> phone)
+const NUS    = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+const NUS_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";  // write  (app -> device)
+const NUS_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";  // notify (device -> app)
 
-let rxChar = null, device = null;
-let laser = 0, patrol = 0;
-let px = 0.5, py = 0.5, dirty = false;
+let rxChar = null, device = null, isOn = false;
 
-const $ = id => document.getElementById(id);
-const statusEl = $("status"), dot = $("dot"), pad = $("pad");
+const $ = s => document.querySelector(s);
+const statusEl = $("#status"), power = $("#power"), plabel = $("#plabel");
 
 function setStatus(t, ok=false){ statusEl.textContent = t; statusEl.classList.toggle("on", ok); }
 
+function reflect(on){
+  isOn = on;
+  power.classList.toggle("on", on);
+  plabel.textContent = on ? "ON" : "OFF";
+}
+
 async function connect(){
-  if (!navigator.bluetooth){
-    setStatus("Web Bluetooth not available in this browser");
-    return;
-  }
+  if (!navigator.bluetooth){ setStatus("Web Bluetooth not available in this browser"); return; }
   try{
     setStatus("Scanning…");
     device = await navigator.bluetooth.requestDevice({
@@ -109,83 +89,39 @@ async function connect(){
     const server = await device.gatt.connect();
     const svc = await server.getPrimaryService(NUS);
     rxChar = await svc.getCharacteristic(NUS_RX);
-    // optional: listen to device replies
+    // listen so the button on the device keeps this page in sync
     try{
       const tx = await svc.getCharacteristic(NUS_TX);
       await tx.startNotifications();
       tx.addEventListener("characteristicvaluechanged", e=>{
-        // device sends "ok\n" etc — nothing to do, but handy for debugging
+        const msg = new TextDecoder().decode(e.target.value).trim();
+        if (msg === "on")  reflect(true);
+        if (msg === "off") reflect(false);
       });
     }catch(_){}
     setStatus("Connected to " + device.name, true);
-    $("connect").textContent = "Disconnect";
-    $("connect").classList.add("connected");
-  }catch(err){
-    setStatus("Connect cancelled / failed");
-  }
+    $("#connect").textContent = "Disconnect";
+    $("#connect").classList.add("connected");
+    power.disabled = false;
+  }catch(err){ setStatus("Connect cancelled / failed"); }
 }
 
 function onDisconnect(){
   rxChar = null;
   setStatus("Disconnected");
-  $("connect").textContent = "Connect";
-  $("connect").classList.remove("connected");
-  laser = 0; $("laser").classList.remove("on"); dot.classList.add("laseroff");
+  $("#connect").textContent = "Connect";
+  $("#connect").classList.remove("connected");
+  power.disabled = true;
+  reflect(false);
 }
 
 async function send(cmd){
   if (!rxChar) return;
   try{ await rxChar.writeValue(new TextEncoder().encode(cmd + "\n")); }
-  catch(_){ /* transient BLE write error, ignore */ }
+  catch(_){}
 }
 
-// ---- joystick ----
-function place(clientX, clientY){
-  const r = pad.getBoundingClientRect();
-  px = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
-  py = Math.min(1, Math.max(0, (clientY - r.top) / r.height));
-  dot.style.left = (px*r.width  - 19) + "px";
-  dot.style.top  = (py*r.height - 19) + "px";
-  dirty = true;
-  if (patrol){ patrol = 0; $("patrol").classList.remove("on"); }
-}
-function ptr(e){
-  const t = e.touches ? e.touches[0] : e;
-  place(t.clientX, t.clientY); e.preventDefault();
-}
-pad.addEventListener("pointerdown", ptr);
-pad.addEventListener("pointermove", e=>{ if(e.buttons) ptr(e); });
-pad.addEventListener("touchmove", ptr, {passive:false});
-
-// stream joystick at ~8 Hz. Invert so screen matches the room mapping,
-// mirroring the firmware's percentage convention (0-100).
-setInterval(()=>{
-  if(!dirty || !rxChar) return; dirty = false;
-  const panPct  = Math.round((1-px)*100);
-  const tiltPct = Math.round((1-py)*100);
-  send(`J${panPct},${tiltPct}`);
-}, 120);
-
-// ---- buttons ----
-$("connect").onclick = ()=>{ (rxChar || device?.gatt?.connected) ? device.gatt.disconnect() : connect(); };
-$("laser").onclick = ()=>{
-  laser ^= 1;
-  $("laser").classList.toggle("on", laser);
-  dot.classList.toggle("laseroff", !laser);
-  send("L" + laser);
-};
-$("patrol").onclick = ()=>{
-  patrol ^= 1;
-  $("patrol").classList.toggle("on", patrol);
-  send("M" + patrol);
-};
-$("center").onclick = ()=>{ place(pad.getBoundingClientRect().left + pad.clientWidth/2,
-                                  pad.getBoundingClientRect().top  + pad.clientHeight/2); };
-$("off").onclick = ()=>{
-  laser = 0; patrol = 0;
-  $("laser").classList.remove("on"); $("patrol").classList.remove("on");
-  dot.classList.add("laseroff");
-  send("X");
-};
+$("#connect").onclick = ()=>{ (device?.gatt?.connected) ? device.gatt.disconnect() : connect(); };
+power.onclick = ()=>{ const next = !isOn; reflect(next); send(next ? "L1" : "L0"); };
 </script>
 </html>

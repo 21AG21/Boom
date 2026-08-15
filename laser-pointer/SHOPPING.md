@@ -1,58 +1,56 @@
 # LASER-POINTER — shopping list
 
-Everything for the Bluetooth pan/tilt laser pointer. Prices are rough
-(AliExpress/Amazon); multipacks are cheaper per unit.
+Everything for the Bluetooth on/off laser. It's short now — no servos, no
+bracket. Prices are rough (Amazon/AliExpress); multipacks are cheaper per
+unit.
 
 ## Required
 
-| # | Part | Search for | ~Price | Notes |
+| # | Part | Buy this (example) | ~Price | Notes |
 |---|---|---|---|---|
-| 1 | **ESP32-C3 SuperMini** | "ESP32-C3 SuperMini" | $4 | The brain. Has Bluetooth LE + USB-C on board. |
-| 2 | **SG90 or MG90S micro servo** | "MG90S metal gear servo" | $3 ea | One for pan, one for tilt. MG90S (metal gear) is quieter and sturdier — worth it. |
-| 1 | **Pan-tilt servo bracket kit** | "SG90 pan tilt bracket" | $2 | The little 2-servo gimbal. Or print `pouch_tilt_bracket` from this repo. |
-| 1 | **5 mW red laser module (KY-008)** | "KY-008 laser module" | $2 | 6 mm diode on a 3-pin board. Class-3R. |
-| 1 | **Momentary pushbutton** | "6x6 tactile pushbutton" or "12mm momentary button" | ~$0 | The physical laser/patrol button. Any normally-open button. |
-| 1 | **Green LED + 220Ω resistor** | "5mm green LED" / "220 ohm resistor" | ~$0 | Optional status light. |
-| — | **Jumper wires** | "dupont jumper wires" | $2 | Female-female for a no-solder prototype. |
-| 1 | **USB-C cable** | you own one | — | Power + flashing. |
+| 1 | **ESP32-C3 SuperMini** (get *pre-soldered pins*) | [3-pack, pins pre-soldered](https://www.amazon.com/ESP32-C3-Development-Supermini-Bluetooth-Pre-Soldered/dp/B0F12JS872) | $4 | The brain + Bluetooth LE + USB-C. Pre-soldered = no iron needed. |
+| 2 | **KY-008 laser module** (3-pack) | [KY-008 3-pack](https://www.amazon.com/KY-008-650nm-Sensor-Module-Arduino/dp/B0786BLLXD) | $2 | The 5 mW red dot. |
+| 3 | **Momentary pushbutton** | search **"tactile push button kit 12mm"** | ~$0 | Any normally-open button. Assortment packs are cheapest. |
+| 4 | **Breadboard + jumper wires** | [4 boards + M-M/F-M/F-F wires](https://www.amazon.com/Solderless-Breadboard-Boards-Flexible-Jumper/dp/B0GVD11LSS) | $2 | Connect everything, no soldering. |
+| — | **USB-C cable** | you own one | — | Power + flashing. |
 
-**Subtotal: ~$13–15.**
+**Subtotal: ~$8.**
 
-## Power — pick one
+> **Cheaper/simpler alternative:** an "Arduino starter kit" (~$25) bundles
+> the breadboard, jumper wires, buttons, LEDs, and resistors in one box —
+> then you only add the ESP32-C3 and the KY-008 laser.
 
-Two micro servos can spike more current than the ESP32-C3's 3V3 pin
-likes, so give them a proper 5V source.
+## Optional
 
-| Option | Parts | ~Price | Notes |
+| Part | Search | ~Price | Notes |
 |---|---|---|---|
-| **Tethered (simplest)** | a 5V USB-C wall charger / power bank | you own one | Feed 5V to the servo rail and the board's 5V pin. Zero extra parts. |
-| **Cordless** | TP4056 USB-C charger + 3.7V LiPo (1000 mAh) + a small **5V boost or 5V BEC** + slide switch | ~$8 | LiPo is 3.7V; servos want ~5V, so add a tiny boost converter. Same battery parts as the other builds in this repo, plus the booster. |
+| Green LED + 220Ω resistor | "5mm green LED" / "220 ohm resistor" | ~$0 | Status light (on = laser on). The build works fine without it. |
 
-If you only ever run it plugged in, skip the whole cordless row.
+## If you want it cordless (optional, later)
+
+| Part | Search | ~Price | Notes |
+|---|---|---|---|
+| TP4056 USB-C charge board | "TP4056 Type-C" | $1 | Charging + battery protection. |
+| 3.7 V LiPo, 300–500 mAh | "3.7v lipo 502030" | $5 | No motors here, so even a tiny cell lasts a long time. |
+| Slide switch | "mini slide switch SS12D00" | ~$0 | Hard on/off for the battery. |
+
+The board runs happily on 3.7 V, so unlike the motorized version you do
+**not** need a 5 V booster — the LiPo can feed it directly.
 
 ## Control app — nothing to buy
 
-The phone/computer remote is [`app/laser-remote.html`](app/laser-remote.html)
-in this repo — just open it in Chrome/Edge. On iPhone you'll want the free
-**Bluefy** browser (App Store) since Safari can't do Web Bluetooth, or use
-the free **nRF Connect** app with the text commands in the README.
+The phone/laptop remote is [`app/laser-remote.html`](app/laser-remote.html)
+in this repo — open it in Chrome/Edge. On iPhone, get the free **Bluefy**
+browser (App Store), or use the free **nRF Connect** app with the text
+commands in the README.
 
 ## Tools
 
-- Arduino IDE (free) to flash firmware.
-- Soldering iron for the permanent build (~8 joints). Breadboard/jumpers
-  work for prototyping with no solder.
-- Small screwdriver for the servo bracket.
-
-## Enclosure (optional)
-
-It's a visible desk toy, so it doesn't need a case — the bare pan-tilt
-bracket on a small base is fine. If you want a printed open stand, reuse
-`pouch_tilt_bracket.stl` + `laser_clip.stl` from
-[`../hardware/stl/`](../hardware/stl/), or ask and I'll generate a
-dedicated `pointer_base` with a button hole and USB-C notch.
+- Arduino IDE (free) to flash the firmware.
+- Nothing else for a breadboard build. (Soldering iron only if you later
+  make it permanent — about 3 joints.)
 
 ---
 
-**Bottom line:** ESP32-C3 + two micro servos + a pan/tilt bracket + a
-KY-008 laser + a pushbutton ≈ **$15**, plus a USB charger you already own.
+**Bottom line:** ESP32-C3 + KY-008 laser + a button + a breadboard ≈ **$8**,
+plus a USB-C cable you already own.

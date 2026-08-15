@@ -55,6 +55,12 @@ const int PIN_LASER = 4;                  // laser signal
 const int PIN_LED   = 5;                  // status LED (optional)
 const int PIN_BTN   = 10;                 // momentary button to GND + wake pin
 
+// Deep sleep saves battery but makes the device invisible to the phone
+// until you press the button to wake it. On the no-solder USB-powered v1
+// there's no battery to save, so set this to 0 to stay always awake and
+// always reachable from the phone. Set to 1 for the battery/compact build.
+#define ENABLE_SLEEP 1
+
 // Go to deep sleep after this long idle (laser off AND no phone connected).
 const uint32_t SLEEP_AFTER_MS = 120000;   // 2 minutes
 
@@ -189,10 +195,12 @@ void loop() {
   // status LED: solid while the laser is on, slow heartbeat when idle
   digitalWrite(PIN_LED, laserOn ? HIGH : ((now % 2400) < 70 ? HIGH : LOW));
 
-  // auto-sleep when there's nothing to stay awake for
+  // auto-sleep when there's nothing to stay awake for (battery build only)
+#if ENABLE_SLEEP
   if (!laserOn && !connected && now - lastActivity > SLEEP_AFTER_MS) {
     goToSleep();
   }
+#endif
 
   delay(5);
 }

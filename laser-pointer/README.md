@@ -31,13 +31,20 @@ build. See [How big it is](#how-big-it-is) and the full shrink plan in
                                   [ push button ]  press = on/off
 ```
 
+## Start here
+
+- **Never soldered? Build v1 first: [NOSOLDER.md](NOSOLDER.md).** Zero
+  soldering, USB-powered, ~$8, ~20 minutes. Everything pushes into a
+  breadboard. This is the recommended starting point.
+- **General walkthrough:** [ASSEMBLY.md](ASSEMBLY.md).
+- **Shrink it later (needs soldering):** [COMPACT.md](COMPACT.md) —
+  thumbnail size + battery + deep sleep, same board and firmware.
+
 ## Parts
 
 See [SHOPPING.md](SHOPPING.md) — about **$8**. A microcontroller, a laser
 module, a button, and a USB cable (add a small battery to go cordless).
 No servos, no bracket.
-
-Full beginner walkthrough: **[ASSEMBLY.md](ASSEMBLY.md)**.
 
 ## 1. Wire it (the whole circuit — 3 connections)
 

@@ -1,0 +1,1087 @@
+<title>Fidget-Tier Market Read</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
+<style>/* ==========================================================================
+   Liquid Glass — v1 "static look"
+   Pure CSS material. No motion. Works in Safari / Chrome / Firefox.
+   Drop this file into any page, add class="lg" to an element.
+   ========================================================================== */
+
+:root {
+  /* material */
+  --lg-blur: 16px;              /* backdrop blur — bigger surfaces use more (see .lg-thick) */
+  --lg-sat: 1.8;                /* vibrancy: iOS saturates the backdrop a lot */
+  --lg-tint: 255 255 255;       /* tint colour (rgb triplet) */
+  --lg-tint-a: 0.14;            /* tint opacity */
+  --lg-rim: 1px;                /* width of the light rim */
+  --lg-rim-hi: rgba(255,255,255,.90);
+  --lg-rim-mid: rgba(255,255,255,.22);
+  --lg-rim-lo: rgba(255,255,255,.62);
+  --lg-shadow: 0 10px 28px -8px rgba(0,0,0,.28), 0 2px 5px -1px rgba(0,0,0,.10), 0 0 0 .5px rgba(0,0,0,.05);
+  --lg-pill: 120 120 128;         /* selection pill: neutral gray reads right on white/light UI */
+  --lg-pill-a: .16;
+  /* content */
+  --lg-ink: 0 0 0;
+  --lg-ink-a: .86;
+  --lg-ink-2a: .55;
+  --lg-accent: 0 122 255;       /* #007AFF */
+  --lg-green: 52 199 89;        /* #34C759 */
+  --lg-r: 999px;
+}
+[data-theme="dark"] {
+  --lg-tint: 22 22 26;
+  --lg-tint-a: 0.36;
+  --lg-rim-hi: rgba(255,255,255,.42);
+  --lg-rim-mid: rgba(255,255,255,.07);
+  --lg-rim-lo: rgba(255,255,255,.22);
+  --lg-shadow: 0 10px 28px -8px rgba(0,0,0,.55), 0 2px 5px -1px rgba(0,0,0,.25), 0 0 0 .5px rgba(255,255,255,.06);
+  --lg-pill: 255 255 255; --lg-pill-a: .14;
+  --lg-ink: 255 255 255;
+  --lg-ink-a: .94;
+  --lg-ink-2a: .60;
+  --lg-accent: 10 132 255;
+  --lg-green: 48 209 88;
+}
+/* System dark (no data-theme attribute set): mirrors the block above so pages
+   using this engine don't need a matchMedia stamp script for OS-dark support.
+   An explicit [data-theme="light"] still wins over system dark. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --lg-tint: 22 22 26;
+    --lg-tint-a: 0.36;
+    --lg-rim-hi: rgba(255,255,255,.42);
+    --lg-rim-mid: rgba(255,255,255,.07);
+    --lg-rim-lo: rgba(255,255,255,.22);
+    --lg-shadow: 0 10px 28px -8px rgba(0,0,0,.55), 0 2px 5px -1px rgba(0,0,0,.25), 0 0 0 .5px rgba(255,255,255,.06);
+    --lg-pill: 255 255 255; --lg-pill-a: .14;
+    --lg-ink: 255 255 255;
+    --lg-ink-a: .94;
+    --lg-ink-2a: .60;
+    --lg-accent: 10 132 255;
+    --lg-green: 48 209 88;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The material
+   -------------------------------------------------------------------------- */
+.lg {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--lg-r);
+  color: rgb(var(--lg-ink) / var(--lg-ink-a));
+  box-shadow: var(--lg-shadow);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none; user-select: none;
+  /* the tint + blur live on the element itself, inset by the rim so the rim
+     stays "clear" like the edge of a lens */
+  background: rgb(var(--lg-tint) / var(--lg-tint-a));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat));
+          backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat));
+}
+/* keep real children above the pseudo layers */
+.lg > * { position: relative; z-index: 2; }
+
+/* Rim light: a 1px ring, brightest where light hits (top-left) and where it
+   exits (bottom-right) — Liquid Glass's signature edge. */
+.lg::before {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  border-radius: inherit;
+  padding: var(--lg-rim);
+  background:
+    linear-gradient(155deg,
+      var(--lg-rim-hi) 0%,
+      var(--lg-rim-mid) 32%,
+      var(--lg-rim-mid) 64%,
+      var(--lg-rim-lo) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite: exclude;
+}
+/* Lens edge: a soft inner band — brighter/denser toward the rim, which is
+   what real refraction reads as at a glance. Also a faint bottom inner
+   shadow so the slab has thickness. */
+.lg::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 .5px rgba(255,255,255,.18),
+    inset 1.5px 2px 4px -2px rgba(255,255,255,.75),
+    inset -1.5px -2.5px 5px -2px rgba(255,255,255,.55),
+    inset 0 -10px 18px -14px rgba(0,0,0,.20),
+    inset 0 0 14px -6px rgba(255,255,255,.35);
+}
+[data-theme="dark"] .lg::after {
+  box-shadow:
+    inset 0 0 0 .5px rgba(255,255,255,.08),
+    inset 1.5px 2px 4px -2px rgba(255,255,255,.35),
+    inset -1.5px -2.5px 5px -2px rgba(255,255,255,.22),
+    inset 0 -10px 18px -14px rgba(0,0,0,.45),
+    inset 0 0 14px -6px rgba(255,255,255,.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .lg::after {
+    box-shadow:
+      inset 0 0 0 .5px rgba(255,255,255,.08),
+      inset 1.5px 2px 4px -2px rgba(255,255,255,.35),
+      inset -1.5px -2.5px 5px -2px rgba(255,255,255,.22),
+      inset 0 -10px 18px -14px rgba(0,0,0,.45),
+      inset 0 0 14px -6px rgba(255,255,255,.10);
+  }
+}
+
+/* Bigger surfaces read as thicker glass: more blur, more tint, deeper shadow */
+.lg-thick {
+  --lg-blur: 26px;
+  --lg-tint-a: 0.22;
+  --lg-shadow: 0 18px 40px -12px rgba(0,0,0,.35), 0 3px 8px -2px rgba(0,0,0,.10);
+}
+[data-theme="dark"] .lg-thick { --lg-tint-a: 0.48; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lg-thick { --lg-tint-a: 0.48; } }
+
+/* "Clear" variant: no adaptive tint, more see-through (use over bold media) */
+.lg-clear { --lg-tint-a: 0.06; --lg-blur: 8px; }
+
+/* Tinted glass (prominent / accent buttons) */
+.lg-tinted {
+  --lg-tint: var(--lg-accent);
+  --lg-tint-a: 0.82;
+  --lg-ink: 255 255 255; --lg-ink-a: 1;
+  --lg-rim-hi: rgba(255,255,255,.75); --lg-rim-mid: rgba(255,255,255,.18); --lg-rim-lo: rgba(255,255,255,.45);
+}
+
+/* Reduced transparency / contrast: go frosty */
+@media (prefers-reduced-transparency: reduce) {
+  .lg { --lg-tint-a: .82; --lg-blur: 0px; }
+  [data-theme="dark"] .lg { --lg-tint-a: .88; }
+}
+@media (prefers-reduced-transparency: reduce) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .lg { --lg-tint-a: .88; }
+}
+
+/* --------------------------------------------------------------------------
+   Components
+   -------------------------------------------------------------------------- */
+.lg, .lg * { box-sizing: border-box; }
+
+/* Buttons */
+.lg-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 44px; min-width: 44px; padding: 0 18px;
+  font: 600 16px/1 -apple-system, system-ui, "SF Pro Text", "Helvetica Neue", sans-serif;
+  letter-spacing: -0.01em;
+  border: 0; cursor: pointer; text-decoration: none; -webkit-appearance: none; appearance: none;
+  touch-action: manipulation;
+}
+.lg-btn.lg-icon { width: 44px; padding: 0; }
+.lg-btn.lg-sm { height: 36px; min-width: 36px; font-size: 14px; }
+.lg-btn.lg-sm.lg-icon { width: 36px; }
+.lg-btn.lg-lg { height: 52px; font-size: 17px; padding: 0 22px; }
+.lg-btn svg, .lg-tab svg, .lg-seg-item svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Cards / panels */
+.lg-card { --lg-r: 28px; padding: 18px; }
+.lg-bar  { --lg-r: 999px; }
+
+/* Tab bar ---------------------------------------------------------------- */
+.lg-tabbar {
+  /* iOS 26 layout: items are content-sized and spread space-between inside a
+     region inset 24pt from the capsule ends; the pill (label + 20pt each side)
+     therefore sits exactly 4pt inside the rounded end on the first/last tab. */
+  display: flex; align-items: stretch; justify-content: space-between; height: 62px; padding: 4px 24px;
+  --lg-blur: 22px;
+}
+.lg-tab {
+  position: relative; z-index: 2; flex: 0 0 auto; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px;
+  color: rgb(var(--lg-ink) / .92);              /* iOS 26: unselected items are full ink, not gray */
+  font: 500 12px/1 -apple-system, system-ui, sans-serif; letter-spacing: -0.005em;
+  cursor: pointer; touch-action: manipulation; border-radius: 999px;
+}
+.lg-tab svg { width: 27px; height: 27px; stroke-width: 2; }
+.lg-tab.is-active { color: rgb(var(--lg-accent)); }
+/* the selection pill: a flat, slightly denser piece of the same glass.
+   Neutral gray on light UI (default); add .lg-on-media to the bar for the
+   milky-white pill Apple uses over photos / colourful wallpapers. */
+.lg-pill {
+  position: absolute; z-index: 1; top: 4px; bottom: 4px; left: 0; width: 0;
+  border-radius: 999px;
+  background: rgb(var(--lg-pill) / var(--lg-pill-a));
+  pointer-events: none;
+}
+.lg-on-media { --lg-pill: 255 255 255; --lg-pill-a: .55; }
+.lg-on-media .lg-pill { box-shadow: 0 2px 6px -1px rgba(0,0,0,.14), inset 0 0 0 .5px rgba(255,255,255,.7), inset 0 1px 1px rgba(255,255,255,.9); }
+[data-theme="dark"] .lg-on-media { --lg-pill: 255 255 255; --lg-pill-a: .18; }
+[data-theme="dark"] .lg-on-media .lg-pill { box-shadow: 0 2px 6px -1px rgba(0,0,0,.35), inset 0 0 0 .5px rgba(255,255,255,.18); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .lg-on-media { --lg-pill: 255 255 255; --lg-pill-a: .18; }
+  :root:not([data-theme="light"]) .lg-on-media .lg-pill { box-shadow: 0 2px 6px -1px rgba(0,0,0,.35), inset 0 0 0 .5px rgba(255,255,255,.18); }
+}
+
+/* Segmented control ------------------------------------------------------ */
+.lg-seg { display: flex; height: 40px; padding: 3px; }
+.lg-seg-item {
+  position: relative; z-index: 2; flex: 1 1 0; display: flex; align-items: center; justify-content: center;
+  font: 600 14px/1 -apple-system, system-ui, sans-serif; letter-spacing: -0.005em;
+  color: rgb(var(--lg-ink) / var(--lg-ink-2a)); cursor: pointer; touch-action: manipulation; border-radius: 999px;
+}
+.lg-seg-item.is-active { color: rgb(var(--lg-ink) / var(--lg-ink-a)); }
+.lg-seg .lg-pill { top: 3px; bottom: 3px; }
+
+/* Toggle ----------------------------------------------------------------- */
+.lg-toggle {
+  position: relative; width: 51px; height: 31px; flex: none;
+  --lg-tint: 120 120 128; --lg-tint-a: .28; --lg-blur: 8px;
+  --lg-shadow: inset 0 0 0 0 transparent;
+  cursor: pointer; touch-action: none;
+}
+.lg-toggle.is-on { --lg-tint: var(--lg-green); --lg-tint-a: .92; }
+.lg-knob {
+  position: absolute; z-index: 2; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0,0,0,.18), 0 1px 1px rgba(0,0,0,.08), inset 0 0 0 .5px rgba(0,0,0,.04);
+  transform: translateX(calc(var(--on, 0) * 20px));
+}
+
+/* Slider (thin track + glass thumb) -------------------------------------- */
+.lg-slider {
+  --v: .5;                       /* 0..1, set by JS */
+  --thumb: 26px;
+  position: relative; height: 44px; display: flex; align-items: center;
+  touch-action: none; cursor: pointer; -webkit-user-select: none; user-select: none;
+}
+.lg-slider-track {
+  position: relative; flex: 1; height: 4px; border-radius: 999px;
+  background: rgba(120,120,128,.28);
+  box-shadow: inset 0 .5px 1px rgba(0,0,0,.08);
+  overflow: hidden;
+}
+[data-theme="dark"] .lg-slider-track { background: rgba(120,120,128,.40); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lg-slider-track { background: rgba(120,120,128,.40); } }
+.lg-slider-fill {
+  position: absolute; inset: 0 auto 0 0; width: calc(var(--v) * 100%);
+  background: rgb(var(--lg-accent)); border-radius: inherit;
+}
+.lg-slider.lg-white .lg-slider-fill { background: #fff; }
+.lg-slider-thumb {
+  position: absolute; z-index: 2; top: 50%; left: calc(var(--v) * (100% - var(--thumb)));
+  width: var(--thumb); height: var(--thumb); margin-top: calc(var(--thumb) / -2);
+  border-radius: 999px; background: rgba(255,255,255,.96);
+  box-shadow:
+    0 3px 8px rgba(0,0,0,.20), 0 1px 1px rgba(0,0,0,.10),
+    inset 0 0 0 .5px rgba(255,255,255,.9), inset 0 -1px 2px rgba(0,0,0,.05);
+}
+/* Capsule slider (Control-Center style: the whole capsule is glass) */
+.lg-slider.lg-capsule {
+  height: 44px; padding: 0; overflow: hidden; --lg-blur: 14px;
+}
+.lg-slider.lg-capsule .lg-slider-track { position: absolute; inset: 0; height: auto; border-radius: inherit; background: none; box-shadow: none; }
+.lg-slider.lg-capsule .lg-slider-fill { background: rgba(255,255,255,.90); }
+[data-theme="dark"] .lg-slider.lg-capsule .lg-slider-fill { background: rgba(255,255,255,.85); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lg-slider.lg-capsule .lg-slider-fill { background: rgba(255,255,255,.85); } }
+.lg-slider.lg-capsule .lg-slider-thumb { display: none; }
+.lg-slider.lg-capsule .lg-slider-icon {
+  position: relative; z-index: 3; margin-left: 12px; width: 22px; height: 22px;
+  color: rgba(0,0,0,.6); mix-blend-mode: multiply;
+}
+.lg-slider.lg-capsule .lg-slider-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.lg-slider.lg-capsule.lg-tall { height: 160px; width: 64px; }
+.lg-slider.lg-capsule.lg-tall .lg-slider-fill { inset: auto 0 0 0; width: auto; height: calc(var(--v) * 100%); }
+.lg-slider.lg-capsule.lg-tall .lg-slider-icon { position: absolute; left: 50%; bottom: 14px; margin: 0 0 0 -11px; }
+
+/* Text on glass ("vibrancy": a touch heavier + tracked) ------------------ */
+.lg-title { font: 600 17px/1.2 -apple-system, system-ui, sans-serif; letter-spacing: -0.01em; }
+.lg-sub   { font: 400 13px/1.35 -apple-system, system-ui, sans-serif; color: rgb(var(--lg-ink) / var(--lg-ink-2a)); }
+
+/* ==========================================================================
+   === MOTION === (v2+)  — hooks driven by liquid-glass.js springs
+   The material "flexes and energizes with light" when touched: it scales up,
+   brightens, and its shadow lifts. All values are CSS custom properties that
+   the spring engine writes every frame; nothing here uses CSS transitions,
+   so every animation is interruptible.
+   ========================================================================== */
+.lg {
+  --lg-sx: 1; --lg-sy: 1; --lg-tx: 0px; --lg-ty: 0px; --lg-press: 0;
+  transform: translate3d(var(--lg-tx), var(--lg-ty), 0) scale(var(--lg-sx), var(--lg-sy));
+  transform-origin: var(--lg-origin, 50% 50%);
+  background: rgb(var(--lg-tint) / calc(var(--lg-tint-a) + var(--lg-press) * 0.14));
+  box-shadow: var(--lg-shadow);
+}
+.lg.is-pressed, .lg.is-moving { will-change: transform; }
+/* energize: a white glow that scales with press, plus a brighter rim */
+.lg::after {
+  background: rgba(255,255,255, calc(var(--lg-press) * 0.16));
+}
+[data-theme="dark"] .lg::after { background: rgba(255,255,255, calc(var(--lg-press) * 0.10)); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lg::after { background: rgba(255,255,255, calc(var(--lg-press) * 0.10)); } }
+.lg::before { filter: brightness(calc(1 + var(--lg-press) * 0.6)); }
+.lg-tinted::after { background: rgba(255,255,255, calc(var(--lg-press) * 0.22)); }
+
+/* Selection pill: positioned by JS with transform (x, width via scaleX is
+   avoided so the corners stay round → we set left/width + scale on press) */
+.lg-pill { --lg-sx: 1; --lg-sy: 1; transform: translate3d(var(--lg-tx, 0px), 0, 0) scale(var(--lg-sx), var(--lg-sy)); will-change: transform; }
+.lg-tabbar.is-pressed .lg-pill, .lg-seg.is-pressed .lg-pill { background: rgb(var(--lg-pill) / calc(var(--lg-pill-a) * 1.5)); }
+
+/* Toggle knob is driven in px by JS (x + stretch) */
+.lg-knob { transform: translate3d(var(--kx, 0px), 0, 0); width: var(--kw, 27px); }
+.lg-toggle { --lg-sx: 1; --lg-sy: 1; }
+/* Slider thumb grows while grabbed */
+.lg-slider-thumb { transform: translate3d(var(--tx, 0px), 0, 0) scale(var(--ts, 1)); }
+.lg-slider { --lg-sx: 1; --lg-sy: 1; --lg-tx: 0px; --lg-ty: 0px; transform: translate3d(var(--lg-tx), var(--lg-ty), 0) scale(var(--lg-sx), var(--lg-sy)); transform-origin: var(--lg-origin, 50% 50%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lg, .lg-pill, .lg-knob, .lg-slider-thumb, .lg-slider { transform: none !important; }
+}
+</style>
+
+<style>
+  :root{
+    --ground:#f4f4f5; --wall:#ffffff;
+    --ink:#0a0a0b; --ink-soft:#6a6a70; --muted:#9c9ca3;
+    --hair:rgba(10,10,12,.13); --hair-soft:rgba(10,10,12,.07);
+
+    --t-hero:clamp(38px,9.5vw,74px);
+    --t-big:clamp(34px,8.5vw,60px);
+    --t-title:clamp(23px,5.4vw,33px);
+    --t-body:clamp(15px,2.2vw,17px);
+    --t-label:14px;
+    --t-cap:12.5px;
+    --pad:22px;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --ground:#000000; --wall:#161618;
+    --ink:#f6f6f8; --ink-soft:#a0a0a8; --muted:#67676f;
+    --hair:rgba(255,255,255,.14); --hair-soft:rgba(255,255,255,.08);
+  }}
+  :root[data-theme="dark"]{
+    --ground:#000000; --wall:#161618;
+    --ink:#f6f6f8; --ink-soft:#a0a0a8; --muted:#67676f;
+    --hair:rgba(255,255,255,.14); --hair-soft:rgba(255,255,255,.08);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ overflow-x:hidden; max-width:100vw; }
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font:var(--t-body)/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    -webkit-tap-highlight-color:transparent; user-select:none;
+    touch-action:manipulation;
+  }
+  h1,h2,h3,p{ margin:0; }
+
+  #app{ position:fixed; inset:0; }
+  .view{
+    position:absolute; inset:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    padding:calc(env(safe-area-inset-top) + 30px)
+            calc(env(safe-area-inset-right) + var(--pad))
+            calc(env(safe-area-inset-bottom) + 128px)
+            calc(env(safe-area-inset-left) + var(--pad));
+    display:none;
+  }
+  .view.is-active{ display:block; }
+  .wrap{ max-width:1160px; margin:0 auto; }
+
+  /* headers */
+  .eyebrow{ font-size:var(--t-cap); font-weight:600; letter-spacing:.02em; color:var(--ink-soft); }
+  .hero{ font-size:var(--t-hero); font-weight:450; letter-spacing:-.035em; line-height:1.08; margin:8px 0 0; }
+  .hero .em{ font-weight:660; }
+  .sub{ font-size:var(--t-body); color:var(--ink-soft); max-width:60ch; margin:16px 0 0; line-height:1.5; }
+
+  .rule{ height:1px; background:var(--hair-soft); border:0; margin:36px 0; }
+  .sec-label{ font-size:var(--t-label); font-weight:650; color:var(--ink-soft); margin:0 0 22px; }
+
+  /* big-number metric atom */
+  .metrics{ display:grid; grid-template-columns:1fr; gap:34px; }
+  @media (min-width:640px){ .metrics{ grid-template-columns:1fr 1fr; gap:40px 48px; } }
+  @media (min-width:1024px){ .metrics{ grid-template-columns:repeat(4,1fr); } }
+  .metric{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .metric .k{ font-size:var(--t-label); font-weight:640; color:var(--ink-soft); }
+  .metric .v{ font-size:var(--t-big); font-weight:600; letter-spacing:-.03em; line-height:1.12;
+              font-variant-numeric:tabular-nums; }
+  .metric .n{ font-size:var(--t-cap); color:var(--muted); line-height:1.45; }
+
+  /* horizontal bars */
+  .bars{ display:flex; flex-direction:column; gap:26px; }
+  .bar{ display:flex; flex-direction:column; gap:9px; }
+  .bar-top{ display:flex; align-items:baseline; justify-content:space-between; gap:14px; }
+  .bar-k{ font-size:var(--t-label); font-weight:560; color:var(--ink-soft); min-width:0;
+          white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-v{ font-size:clamp(19px,4vw,26px); font-weight:640; letter-spacing:-.02em;
+          font-variant-numeric:tabular-nums; flex:none; }
+  .bar-track{ height:10px; background:var(--hair-soft); border-radius:5px; overflow:hidden; }
+  .bar-fill{ display:block; height:100%; background:var(--ink); border-radius:5px; }
+  .bar.lead .bar-k{ color:var(--ink); font-weight:680; }
+  .bar.lead .bar-k::before{ content:"● "; font-size:.7em; }
+
+  /* vertical columns (a time series) */
+  .colchart{ margin-top:8px; }
+  .cols{ display:flex; align-items:flex-end; gap:clamp(8px,2.5vw,22px); height:230px; }
+  .col{ flex:1 1 0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+        gap:8px; height:100%; min-width:0; }
+  .col-v{ font-size:var(--t-cap); font-weight:640; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .col-bar{ width:100%; max-width:52px; background:var(--ink); border-radius:5px 5px 0 0; }
+  .col.soft .col-bar{ background:var(--muted); }
+  .col-y{ font-size:var(--t-cap); color:var(--muted); font-variant-numeric:tabular-nums; }
+
+  /* ledger rows */
+  .ledger{ display:flex; flex-direction:column; }
+  .lrow{ display:flex; align-items:baseline; justify-content:space-between; gap:18px;
+         padding:20px 0; border-top:1px solid var(--hair-soft); }
+  .lrow:first-child{ border-top:0; }
+  .lrow .lk{ min-width:0; }
+  .lrow .name{ font-size:clamp(19px,4.4vw,25px); font-weight:520; letter-spacing:-.02em; line-height:1.15; }
+  .lrow .desc{ font-size:var(--t-cap); color:var(--muted); margin-top:4px; line-height:1.45; max-width:46ch; }
+  .lrow .price{ font-size:clamp(22px,5vw,30px); font-weight:660; letter-spacing:-.02em;
+                font-variant-numeric:tabular-nums; flex:none; text-align:right; }
+  .lrow .price .u{ font-size:.5em; font-weight:600; color:var(--muted); }
+  .lrow.lead .name{ font-weight:700; }
+  .lrow.lead .name::before{ content:"● "; font-size:.6em; vertical-align:middle; }
+
+  /* trend rows */
+  .trends{ display:flex; flex-direction:column; gap:30px; }
+  .trend{ display:flex; flex-direction:column; gap:7px; }
+  .trend .tk{ font-size:var(--t-label); font-weight:640; color:var(--ink-soft); }
+  .trend .tv{ font-size:clamp(18px,3.4vw,23px); font-weight:460; letter-spacing:-.02em; line-height:1.28; }
+  .trend .tn{ font-size:var(--t-cap); color:var(--muted); margin-top:2px; }
+
+  /* the one loud block */
+  .note{ background:var(--ink); color:var(--ground); border-radius:18px;
+         padding:24px 24px; margin:2px 0 0; }
+  .note .nt{ font-size:clamp(22px,5vw,32px); font-weight:640; letter-spacing:-.02em; line-height:1.16; }
+  .note .ns{ font-size:var(--t-body); opacity:.82; margin-top:12px; line-height:1.5; }
+
+  .foot{ font-size:var(--t-cap); color:var(--muted); line-height:1.7; margin-top:6px; }
+
+  /* tab bar */
+  .lg-tabbar{ position:fixed; left:50%; transform:translateX(-50%);
+              bottom:calc(env(safe-area-inset-bottom) + 14px); z-index:60; }
+
+  a{ color:inherit; text-underline-offset:3px; text-decoration-thickness:1px; text-decoration-color:var(--hair); }
+  @media (prefers-reduced-motion:reduce){ *{ animation:none!important; transition:none!important; } }
+</style>
+
+<div id="app">
+
+  <!-- ========== MARKETS ========== -->
+  <section class="view is-active" id="v-markets">
+    <div class="wrap">
+      <p class="eyebrow">Market read · Aug 2026 · the arenas</p>
+      <h1 class="hero">Four markets a<br><span class="em">fidget-tier</span> object can enter.</h1>
+      <p class="sub">The spinner proved a $0.50 part can become a global craze. These are the pools that a cheap, tactile, shareable object could pull from in 2026 — sized, with their growth.</p>
+
+      <hr class="rule">
+      <p class="sec-label">Market size · latest year</p>
+      <div class="metrics">
+        <div class="metric">
+          <span class="k">Fidget toys</span>
+          <span class="v">$9.6B</span>
+          <span class="n">2026 → $17.7B by 2034 · ~8% CAGR · the impulse channel</span>
+        </div>
+        <div class="metric">
+          <span class="k">Blind-box collectibles</span>
+          <span class="v">$17B</span>
+          <span class="n">2024 → $38B by 2032 · ~9.5% CAGR · the restock engine</span>
+        </div>
+        <div class="metric">
+          <span class="k">Mental-health devices</span>
+          <span class="v">$8.2B</span>
+          <span class="n">2025 → $59.6B by 2035 · ~22% CAGR</span>
+        </div>
+        <div class="metric">
+          <span class="k">Plantable / eco-novelty</span>
+          <span class="v">$155M</span>
+          <span class="n">2025 → $384M by 2034 · ~11% CAGR</span>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <p class="sec-label">The opportunity, framed</p>
+      <div class="ledger">
+        <div class="lrow">
+          <div class="lk"><div class="name">Total pool</div>
+            <div class="desc">Fidget impulse spend plus anxiety self-care — tens of billions, growing every year.</div></div>
+          <div class="price">$35B<span class="u">+</span></div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Serviceable</div>
+            <div class="desc">Handheld tactile calm + collectible desk objects. Smaller, but proven — see the next tab.</div></div>
+          <div class="price">$2–4B</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Obtainable, 3-yr</div>
+            <div class="desc">A conservative 0.02–0.05% of the fidget market alone. The upside case is the spinner's own history.</div></div>
+          <div class="price">$1.6–4M</div>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <div class="note">
+        <div class="nt">The spinner peaked at $2.2B and ~300M units — in one year.</div>
+        <div class="ns">2017. It won on tactility and timing, not technology. That is the ceiling these ideas are underwriting against — not the base case, but the reason the base case is worth chasing.</div>
+      </div>
+      <p class="foot">Sizes vary 2–3× by research firm and scope; figures are the most-cited values, rounded, with sources on the Verdict tab.</p>
+    </div>
+  </section>
+
+  <!-- ========== RIVALS ========== -->
+  <section class="view" id="v-rivals">
+    <div class="wrap">
+      <p class="eyebrow">Market read · handheld calm devices</p>
+      <h1 class="hero">The category is <span class="em">already sold</span> — at roughly 5× the price.</h1>
+      <p class="sub">A handheld device that paces your breathing through touch is not hypothetical. People buy it today. Every rival sits far above an impulse price — which is the whole opening.</p>
+
+      <hr class="rule">
+      <p class="sec-label">Price, by device (USD)</p>
+      <div class="bars">
+        <div class="bar lead">
+          <div class="bar-top"><span class="bar-k">Breathe Stone · target</span><span class="bar-v">$34</span></div>
+          <div class="bar-track"><span class="bar-fill" style="width:9.7%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="bar-top"><span class="bar-k">Core · Hyperice</span><span class="bar-v">$159</span></div>
+          <div class="bar-track"><span class="bar-fill" style="width:45.6%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="bar-top"><span class="bar-k">Moonbird</span><span class="bar-v">$199</span></div>
+          <div class="bar-track"><span class="bar-fill" style="width:57%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="bar-top"><span class="bar-k">Sensate</span><span class="bar-v">$299</span></div>
+          <div class="bar-track"><span class="bar-fill" style="width:85.7%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="bar-top"><span class="bar-k">Apollo Neuro</span><span class="bar-v">$349</span></div>
+          <div class="bar-track"><span class="bar-fill" style="width:100%"></span></div>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <p class="sec-label">Who's in the ring</p>
+      <div class="ledger">
+        <div class="lrow lead">
+          <div class="lk"><div class="name">Moonbird</div>
+            <div class="desc">A silicone device that expands and contracts in your hand to pace breathing. No subscription. The closest thing that exists — and the proof demand is real.</div></div>
+          <div class="price">$199</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Core · Hyperice</div>
+            <div class="desc">Handheld meditation trainer with a built-in ECG sensor. The cheapest handheld rival — still nearly 5× the target price.</div></div>
+          <div class="price">$159</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Sensate</div>
+            <div class="desc">Chest-placed infrasonic device for vagus-nerve calming, session-based.</div></div>
+          <div class="price">$299</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Apollo Neuro</div>
+            <div class="desc">All-day wearable delivering gentle vibration to improve HRV. The clinical-trial leader.</div></div>
+          <div class="price">$349</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Calm · Headspace</div>
+            <div class="desc">Software. Guided breathing on a screen — the thing an anti-screen object competes against.</div></div>
+          <div class="price">$70<span class="u">/yr</span></div>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <div class="note">
+        <div class="nt">Nobody serves the $30 shelf, or the waiting room.</div>
+        <div class="ns">A $199 gadget can't be an impulse buy, a gift, or a bulk kit for an ER or an airline. That empty price band and those closed channels are the wedge.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TRENDS ========== -->
+  <section class="view" id="v-trends">
+    <div class="wrap">
+      <p class="eyebrow">Market read · the tailwinds</p>
+      <h1 class="hero">Three currents all<br>pushing the <span class="em">same way</span>.</h1>
+      <p class="sub">A product doesn't go vertical on its own — it rides a moment. In 2026 three consumer currents converge on cheap, tactile, analog, collectible objects.</p>
+
+      <hr class="rule">
+      <p class="sec-label">Pop Mart annual revenue · RMB bn</p>
+      <div class="colchart">
+        <div class="cols">
+          <div class="col soft"><span class="col-v">2.5</span><span class="col-bar" style="height:7%"></span><span class="col-y">2020</span></div>
+          <div class="col soft"><span class="col-v">4.5</span><span class="col-bar" style="height:12%"></span><span class="col-y">2021</span></div>
+          <div class="col soft"><span class="col-v">4.6</span><span class="col-bar" style="height:12%"></span><span class="col-y">2022</span></div>
+          <div class="col soft"><span class="col-v">6.3</span><span class="col-bar" style="height:17%"></span><span class="col-y">2023</span></div>
+          <div class="col soft"><span class="col-v">13.0</span><span class="col-bar" style="height:35%"></span><span class="col-y">2024</span></div>
+          <div class="col"><span class="col-v">37.1</span><span class="col-bar" style="height:100%"></span><span class="col-y">2025</span></div>
+        </div>
+      </div>
+      <p class="foot">Pop Mart, maker of Labubu, grew revenue ~185% in 2025 to RMB 37.1B (~$5.4B). The blind-box collectible loop is the biggest consumer-object story of the decade.</p>
+
+      <hr class="rule">
+      <p class="sec-label">What's moving</p>
+      <div class="trends">
+        <div class="trend">
+          <span class="tk">Screen fatigue</span>
+          <span class="tv">"Dopamine detox" and digital-wellbeing went mainstream — people are actively buying <em>dumb</em>, analog objects to get off the screen.</span>
+          <span class="tn">Offline time is now treated as a status symbol among Gen Z and Alpha.</span>
+        </div>
+        <div class="trend">
+          <span class="tk">The analog backlash</span>
+          <span class="tv">Dumbphones, wired earbuds, film cameras, paper planners. Anything that isn't another app is having a moment.</span>
+          <span class="tn">Brick-phone purchases among 18–24s up 148% (2021→2024); dumbphone sales up 68% in early Jan 2026.</span>
+        </div>
+        <div class="trend">
+          <span class="tk">Collectible mania</span>
+          <span class="tv">Labubu made blind-box collecting a global adult habit. The "collect-them-all" loop is proven at scale.</span>
+          <span class="tn">Pop Mart cleared $5B in 2025 (+185%); the Labubu line alone grew 366%; eBay Labubu searches up 2,600%.</span>
+        </div>
+        <div class="trend">
+          <span class="tk">Who's spending</span>
+          <span class="tv">"Kidults" — adults buying toys for themselves — are now roughly a quarter of the entire US toy market.</span>
+          <span class="tn">~25% of US toy sales in 2025. Gen Z is the megaphone; adults are the wallet.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== VERDICT ========== -->
+  <section class="view" id="v-verdict">
+    <div class="wrap">
+      <p class="eyebrow">Market read · the call</p>
+      <h1 class="hero">Demand is proven.<br>The gap is <span class="em">price and form</span>.</h1>
+      <p class="sub">Put the three tabs together and the read is unusually clean for an early idea.</p>
+
+      <hr class="rule">
+      <div class="ledger">
+        <div class="lrow">
+          <div class="lk"><div class="name">Demand — proven</div>
+            <div class="desc">Moonbird already sells a handheld breathing pacer at $199. The category isn't a bet; the price point is.</div></div>
+          <div class="price">✓</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Engine — proven</div>
+            <div class="desc">The blind-box restock loop drives billions. A collectible layer turns one sale into many.</div></div>
+          <div class="price">✓</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Timing — proven</div>
+            <div class="desc">Screen fatigue and the analog backlash are the exact tailwind a no-screen tactile object needs.</div></div>
+          <div class="price">✓</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">The open question</div>
+            <div class="desc">Can it be made cheap enough — a ~$12 COGS, ~$34 retail — to own the shelf the incumbents left empty?</div></div>
+          <div class="price">?</div>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <div class="note">
+        <div class="nt">Undercut on price, win on form, open a channel they can't reach.</div>
+        <div class="ns">$34 not $199. A stone in your pocket, not a gadget in a case. And a $5 kinetic version for the waiting rooms and airlines a premium device will never touch.</div>
+      </div>
+
+      <hr class="rule">
+      <p class="sec-label">Sources</p>
+      <p class="foot">
+        Fidget toys — Fortune Business Insights, Verified Market Research (2025–26).
+        Blind-box — Verified Market Research (2024–32); Pop Mart revenue — Statista, GMW, TechNode (FY2025).
+        Mental-health devices — BIS Research (2025–35).
+        Plantable packaging — USD Analytics, Grand View (2025–34).
+        Devices &amp; pricing — Fast Company / Tom's Guide (Moonbird), getsensate.com, apolloneuro.com, Hyperice (2025–26).
+        Trends — Retail Dive / The Toy Association (kidults), SlashGear (dumbphones), CNBC (Labubu).
+        Spinner peak — Business of Business (2017).
+        Syndicated market sizes vary 2–5× by firm; figures are rounded to the most-cited value with the range noted. Moonbird's price is review-corroborated (vendor site unreachable); one 2026 page lists $229.99 MSRP / $199.99 sale.
+      </p>
+    </div>
+  </section>
+
+  <!-- the one piece of chrome -->
+  <nav class="lg lg-bar lg-tabbar" role="tablist" aria-label="Sections">
+    <div class="lg-tab is-active" role="tab" aria-selected="true" data-view="v-markets">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V13"/><path d="M12 20V6"/><path d="M19 20v-9"/></g></svg>
+      <span>Markets</span>
+    </div>
+    <div class="lg-tab" role="tab" aria-selected="false" data-view="v-rivals">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/></svg>
+      <span>Rivals</span>
+    </div>
+    <div class="lg-tab" role="tab" aria-selected="false" data-view="v-trends">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15l4.5-4.5 3 3L18 6"/><path d="M14 6h4v4"/></g></svg>
+      <span>Trends</span>
+    </div>
+    <div class="lg-tab" role="tab" aria-selected="false" data-view="v-verdict">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 4.5h11l-2.2 4 2.2 4H6"/></g></svg>
+      <span>Verdict</span>
+    </div>
+  </nav>
+</div>
+
+<script>/* ==========================================================================
+   Liquid Glass v2 — motion engine (springs, press "energize", gel drag,
+   fluid tab pill, stretchy toggle, rubber-band sliders). No refraction.
+   ~7 KB. No dependencies. Works everywhere Pointer Events do.
+
+   Motion model follows Apple's fluid-interface rules: respond on pointer-
+   down, track 1:1, springs (response / damping) instead of durations,
+   velocity hand-off on release, rubber-band at edges, everything
+   interruptible.
+   ========================================================================== */
+(function () {
+  'use strict';
+  var clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
+  var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------------------------------------------------------------- */
+  /* Spring engine: one rAF loop, semi-implicit Euler with sub-steps.        */
+  /* response = seconds to reach target-ish; damping 1 = no overshoot.       */
+  /* ---------------------------------------------------------------------- */
+  var active = new Set(), rafId = 0, lastT = 0, afterFrame = [];
+  function loop(t) {
+    rafId = 0;
+    var dt = lastT ? Math.min(0.05, (t - lastT) / 1000) : 1 / 60; lastT = t;
+    active.forEach(function (s) { s._step(dt); });
+    for (var i = 0; i < afterFrame.length; i++) afterFrame[i](t);
+    if (active.size) rafId = requestAnimationFrame(loop); else lastT = 0;
+  }
+  function wake() { if (!rafId) rafId = requestAnimationFrame(loop); }
+
+  function Spring(value, onUpdate, response, damping) {
+    this.v = value; this.t = value; this.vel = 0;
+    this.response = response || 0.35; this.damping = damping == null ? 1 : damping;
+    this.onUpdate = onUpdate; this.eps = 0.001;
+  }
+  Spring.prototype.set = function (target, o) {
+    o = o || {};
+    if (o.response) this.response = o.response;
+    if (o.damping != null) this.damping = o.damping;
+    if (o.velocity != null) this.vel = o.velocity;
+    this.t = target;
+    if (reduceMotion || o.immediate) { this.v = target; this.vel = 0; this.onUpdate(this.v); active.delete(this); return this; }
+    active.add(this); wake(); return this;
+  };
+  Spring.prototype._step = function (dt) {
+    var w = 2 * Math.PI / this.response, k = w * w, c = 2 * this.damping * w;
+    var n = Math.ceil(dt / 0.004), h = dt / n;
+    for (var i = 0; i < n; i++) {
+      var a = -k * (this.v - this.t) - c * this.vel;
+      this.vel += a * h; this.v += this.vel * h;
+    }
+    if (Math.abs(this.v - this.t) < this.eps && Math.abs(this.vel) < this.eps * 20) { this.v = this.t; this.vel = 0; active.delete(this); }
+    this.onUpdate(this.v);
+  };
+
+  /* Apple's rubber-band: the further past the bound, the less it follows */
+  function rubber(over, dim, c) { c = c || 0.55; return (over * dim * c) / (dim + c * Math.abs(over)); }
+  /* Apple's momentum projection (UIScrollView deceleration) */
+  function project(v, rate) { rate = rate || 0.998; return (v / 1000) * rate / (1 - rate); }
+
+  /* pointer velocity tracker (px/s) */
+  function Tracker() { this.h = []; }
+  Tracker.prototype.push = function (x, y, t) { this.h.push([x, y, t]); if (this.h.length > 6) this.h.shift(); };
+  Tracker.prototype.velocity = function () {
+    var h = this.h; if (h.length < 2) return [0, 0];
+    var a = h[0], b = h[h.length - 1], dt = (b[2] - a[2]) / 1000;
+    if (dt < 0.004) return [0, 0];
+    var vx = (b[0] - a[0]) / dt, vy = (b[1] - a[1]) / dt, m = 6000;
+    return [clamp(vx, -m, m), clamp(vy, -m, m)];
+  };
+
+  /* observers (v3/v4 add-ons hook here to sync refraction / shader shapes) */
+  var observers = [];
+  function notify(el, state) { for (var i = 0; i < observers.length; i++) observers[i](el, state); }
+  var setVar = function (el, k, v) { el.style.setProperty(k, v); };
+
+  /* ---------------------------------------------------------------------- */
+  /* Pressable glass: scale up, energize, gel-pull toward the finger.        */
+  /* ---------------------------------------------------------------------- */
+  function pressable(el, opts) {
+    opts = opts || {};
+    var big = el.offsetWidth > 120 || el.offsetHeight > 120;
+    var upScale = opts.scale || (big ? 1.03 : 1.09);
+    var st = { sx: 1, sy: 1, tx: 0, ty: 0, press: 0 };
+    var apply = function () {
+      setVar(el, '--lg-sx', st.sx.toFixed(4)); setVar(el, '--lg-sy', st.sy.toFixed(4));
+      setVar(el, '--lg-tx', st.tx.toFixed(2) + 'px'); setVar(el, '--lg-ty', st.ty.toFixed(2) + 'px');
+      setVar(el, '--lg-press', st.press.toFixed(3));
+      notify(el, st);
+    };
+    var sSx = new Spring(1, function (v) { st.sx = v; apply(); }, 0.28, 1);
+    var sSy = new Spring(1, function (v) { st.sy = v; apply(); }, 0.28, 1);
+    var sTx = new Spring(0, function (v) { st.tx = v; apply(); }, 0.22, 1);
+    var sTy = new Spring(0, function (v) { st.ty = v; apply(); }, 0.22, 1);
+    var sP  = new Spring(0, function (v) { st.press = v; apply(); }, 0.18, 1);
+    var down = null, rect = null;
+    el.addEventListener('pointerdown', function (e) {
+      if (e.button) return;
+      down = { x: e.clientX, y: e.clientY, id: e.pointerId }; rect = el.getBoundingClientRect();
+      el.classList.add('is-pressed');
+      try { el.setPointerCapture(e.pointerId); } catch (_) {}
+      sSx.set(upScale, { response: 0.26, damping: 1 }); sSy.set(upScale, { response: 0.26, damping: 1 });
+      sP.set(1, { response: 0.16 });
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (!down || e.pointerId !== down.id) return;
+      // gel: the glass leans toward the finger, and stretches a little along the pull
+      var dx = e.clientX - down.x, dy = e.clientY - down.y;
+      var px = rubber(dx, 60, 0.4), py = rubber(dy, 60, 0.4);
+      sTx.set(px * 0.35); sTy.set(py * 0.35);
+      var stretch = clamp(Math.hypot(px, py) / 300, 0, 0.06);
+      var ax = Math.abs(px) / (Math.abs(px) + Math.abs(py) + 1e-6);
+      sSx.set(upScale + stretch * ax); sSy.set(upScale + stretch * (1 - ax));
+      // moved far away → cancel highlight (like UIKit)
+      var out = e.clientX < rect.left - 44 || e.clientX > rect.right + 44 || e.clientY < rect.top - 44 || e.clientY > rect.bottom + 44;
+      sP.set(out ? 0 : 1, { response: 0.2 });
+    });
+    var up = function (e) {
+      if (!down || (e && e.pointerId !== down.id)) return;
+      down = null; el.classList.remove('is-pressed');
+      // release "pops" back with a touch of bounce — the finger's release is momentum
+      sSx.set(1, { response: 0.42, damping: 0.62 }); sSy.set(1, { response: 0.42, damping: 0.62 });
+      sTx.set(0, { response: 0.4, damping: 0.7 }); sTy.set(0, { response: 0.4, damping: 0.7 });
+      sP.set(0, { response: 0.45 });
+    };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('lostpointercapture', up);
+    apply();
+    el._lgState = st;
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Tab bar / segmented control: fluid selection pill                       */
+  /* ---------------------------------------------------------------------- */
+  function pillGroup(el, itemSel) {
+    var pill = el.querySelector('.lg-pill');
+    if (!pill) { pill = document.createElement('div'); pill.className = 'lg-pill'; el.insertBefore(pill, el.firstChild); }
+    var items = Array.prototype.slice.call(el.querySelectorAll(itemSel));
+    var index = Math.max(0, items.findIndex(function (i) { return i.classList.contains('is-active'); }));
+    var st = { x: 0, w: 0, sx: 1, sy: 1, press: 0 };
+    var apply = function () {
+      pill.style.left = '0px'; pill.style.width = st.w.toFixed(2) + 'px';
+      setVar(pill, '--lg-tx', st.x.toFixed(2) + 'px'); setVar(pill, '--lg-sx', st.sx.toFixed(4)); setVar(pill, '--lg-sy', st.sy.toFixed(4));
+      notify(pill, st);
+    };
+    var sX = new Spring(0, function (v) { st.x = v; apply(); }, 0.35, 0.85);
+    var sW = new Spring(0, function (v) { st.w = v; apply(); }, 0.35, 0.9);
+    var sS = new Spring(1, function (v) { st.sx = st.sy = v; apply(); }, 0.25, 1);
+    var isTabbar = el.classList.contains('lg-tabbar');
+    var EXTRA = isTabbar ? 20 : 0;   // iOS 26 tab pill = item content + 20pt each side; segments = segment
+    var geo = function (i) { var it = items[i]; return { x: it.offsetLeft - EXTRA, w: it.offsetWidth + 2 * EXTRA }; };
+    var bounds = function () { var first = items[0], last = items[items.length - 1]; return { min: first.offsetLeft - EXTRA, max: last.offsetLeft + last.offsetWidth + EXTRA }; };
+    var nearest = function (cx) { var best = 0, bd = 1e9; items.forEach(function (it, k) { var d = Math.abs(it.offsetLeft + it.offsetWidth / 2 - cx); if (d < bd) { bd = d; best = k; } }); return best; };
+    var mark = function (i) { items.forEach(function (it, k) { it.classList.toggle('is-active', k === i); it.setAttribute('aria-selected', k === i); }); };
+    var select = function (i, opt) {
+      opt = opt || {};
+      index = clamp(i, 0, items.length - 1);
+      var g = geo(index);
+      sX.set(g.x, { response: opt.response || 0.38, damping: opt.damping == null ? 0.82 : opt.damping, velocity: opt.velocity, immediate: opt.immediate });
+      sW.set(g.w, { immediate: opt.immediate });
+      mark(index);
+      if (opt.fire) el.dispatchEvent(new CustomEvent('lg-change', { detail: index, bubbles: true }));
+    };
+    var down = null, tracker = null, minX = 0, maxX = 0;
+    el.addEventListener('pointerdown', function (e) {
+      if (e.button) return;
+      var r = el.getBoundingClientRect(), b = bounds();
+      down = { id: e.pointerId, x0: e.clientX, left: r.left, moved: false, i0: index };
+      tracker = new Tracker(); tracker.push(e.clientX, e.clientY, e.timeStamp);
+      minX = b.min; maxX = b.max - st.w;
+      try { el.setPointerCapture(e.pointerId); } catch (_) {}
+      el.classList.add('is-pressed');
+      // the pill lifts under the finger
+      sS.set(1.08, { response: 0.22 });
+      // grab offset: if the finger is on the pill keep the offset, else jump under finger
+      var localX = e.clientX - r.left;
+      down.grab = (localX >= st.x && localX <= st.x + st.w) ? localX - st.x : st.w / 2;
+      if (down.grab === st.w / 2) sX.set(clamp(localX - st.w / 2, minX, maxX), { response: 0.3, damping: 0.85 });
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (!down || e.pointerId !== down.id) return;
+      tracker.push(e.clientX, e.clientY, e.timeStamp);
+      if (Math.abs(e.clientX - down.x0) > 4) down.moved = true;
+      var localX = e.clientX - down.left;
+      var x = localX - down.grab;
+      // rubber-band past the ends
+      if (x < minX) x = minX + rubber(x - minX, 80, 0.5); else if (x > maxX) x = maxX + rubber(x - maxX, 80, 0.5);
+      sX.set(x, { response: 0.16, damping: 1 });
+      // live-highlight the item under the pill centre; the pill morphs to that item's width
+      var best = nearest(x + st.w / 2);
+      if (best !== index) {
+        index = best; mark(index);
+        var gw = geo(best).w; if (Math.abs(gw - sW.t) > 0.5) { down.grab += (gw - sW.t) / 2; sW.set(gw, { response: 0.28, damping: 0.9 }); maxX = bounds().max - gw; }
+      }
+    });
+    var up = function (e) {
+      if (!down || (e && e.pointerId !== down.id)) return;
+      var v = tracker.velocity()[0];
+      // land on the item under the pill; a real flick can nudge it one item further, never more
+      var nudge = down.moved && Math.abs(v) > 350 ? clamp(project(v, 0.985), -st.w * 0.6, st.w * 0.6) : 0;
+      var best = nearest(sX.t + sW.t / 2 + nudge);   // sX.t = where the finger left it (the pill itself lags)
+      if (!down.moved) best = nearest((e ? e.clientX : down.x0) - down.left);   // plain tap: nearest item, gaps included
+      down = null; el.classList.remove('is-pressed');
+      sS.set(1, { response: 0.4, damping: 0.7 });
+      select(best, { fire: true, velocity: v, response: 0.42, damping: 0.78 });
+    };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    items.forEach(function (it) { it.setAttribute('role', 'tab'); });
+    select(index, { immediate: true });
+    window.addEventListener('resize', function () { select(index, { immediate: true }); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { select(index, { immediate: true }); });
+    el.lgSelect = function (i) { select(i, {}); };
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Toggle: stretchy glass knob, tap or drag                                */
+  /* ---------------------------------------------------------------------- */
+  function toggle(el) {
+    var knob = el.querySelector('.lg-knob');
+    var on = el.classList.contains('is-on');
+    var W = 27, TRAVEL = 20, STRETCH = 7;
+    var st = { x: on ? TRAVEL : 0, w: W };
+    var apply = function () { setVar(knob, '--kx', st.x.toFixed(2) + 'px'); setVar(knob, '--kw', st.w.toFixed(2) + 'px'); notify(el, st); };
+    var sX = new Spring(st.x, function (v) { st.x = v; apply(); }, 0.32, 0.8);
+    var sW = new Spring(W, function (v) { st.w = v; apply(); }, 0.28, 1);
+    var set = function (v, fire) {
+      on = !!v; el.classList.toggle('is-on', on); el.setAttribute('aria-checked', on);
+      sX.set(on ? TRAVEL : 0, { response: 0.32, damping: 0.78 });
+      if (fire) el.dispatchEvent(new CustomEvent('lg-change', { detail: on, bubbles: true }));
+    };
+    el.setAttribute('role', 'switch'); el.tabIndex = 0; el.setAttribute('aria-checked', on);
+    var down = null, tracker;
+    el.addEventListener('pointerdown', function (e) {
+      if (e.button) return;
+      down = { id: e.pointerId, x0: e.clientX, moved: false, start: on }; tracker = new Tracker(); tracker.push(e.clientX, 0, e.timeStamp);
+      try { el.setPointerCapture(e.pointerId); } catch (_) {}
+      // knob stretches toward the other side while pressed
+      sW.set(W + STRETCH, { response: 0.22 });
+      if (on) sX.set(TRAVEL - STRETCH, { response: 0.22, damping: 1 });
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (!down || e.pointerId !== down.id) return;
+      tracker.push(e.clientX, 0, e.timeStamp);
+      var dx = e.clientX - down.x0;
+      if (Math.abs(dx) > 3) down.moved = true;
+      var base = down.start ? TRAVEL - STRETCH : 0;
+      var x = base + dx, lo = 0, hi = TRAVEL - STRETCH;
+      if (x < lo) x = lo + rubber(x - lo, 30, 0.5); else if (x > hi) x = hi + rubber(x - hi, 30, 0.5);
+      sX.set(x, { response: 0.14, damping: 1 });
+    });
+    var up = function (e) {
+      if (!down || (e && e.pointerId !== down.id)) return;
+      var v = tracker.velocity()[0], next;
+      if (!down.moved) next = !on; else next = Math.abs(v) > 120 ? v > 0 : (sX.t + STRETCH / 2) > TRAVEL / 2;
+      down = null;
+      sW.set(W, { response: 0.32, damping: 0.75 });
+      set(next, true);
+    };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    el.addEventListener('keydown', function (e) { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); set(!on, true); } });
+    apply();
+    el.lgSet = function (v) { set(v, false); };
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Sliders: 1:1 tracking, thumb grows, rubber-band stretch past the ends   */
+  /* ---------------------------------------------------------------------- */
+  function slider(el) {
+    var vertical = el.classList.contains('lg-tall');
+    var capsule = el.classList.contains('lg-capsule');
+    var track = el.querySelector('.lg-slider-track') || el;
+    var thumb = el.querySelector('.lg-slider-thumb');
+    var v = parseFloat(el.dataset.value || 0.5);
+    var st = { v: v, ts: 1, sx: 1, sy: 1, over: 0, tx: 0, ty: 0, press: 0 };
+    var apply = function () {
+      setVar(el, '--v', st.v.toFixed(4));
+      if (thumb) { setVar(thumb, '--ts', st.ts.toFixed(4)); setVar(thumb, '--tx', st.tx.toFixed(2) + 'px'); }
+      setVar(el, '--lg-sx', st.sx.toFixed(4)); setVar(el, '--lg-sy', st.sy.toFixed(4));
+      setVar(el, '--lg-press', st.press.toFixed(3));
+      notify(el, st);
+    };
+    var setV = function (nv, fire) { st.v = clamp(nv, 0, 1); el.dataset.value = st.v.toFixed(4); apply(); if (fire) el.dispatchEvent(new CustomEvent('lg-input', { detail: st.v, bubbles: true })); };
+    var sTs = new Spring(1, function (x) { st.ts = x; apply(); }, 0.25, 1);
+    var sSx = new Spring(1, function (x) { st.sx = x; apply(); }, 0.25, 1);
+    var sSy = new Spring(1, function (x) { st.sy = x; apply(); }, 0.25, 1);
+    var sTx = new Spring(0, function (x) { st.tx = x; apply(); }, 0.2, 1);
+    var sP  = new Spring(0, function (x) { st.press = x; apply(); }, 0.2, 1);
+    var down = null;
+    var thumbW = function () { return (thumb && !capsule) ? thumb.offsetWidth : 0; };
+    var raw = function (e) { // unclamped 0..1 position along the track
+      var r = track.getBoundingClientRect(), t = thumbW();
+      if (vertical) return 1 - (e.clientY - r.top - (down ? down.grab : 0)) / r.height;
+      return (e.clientX - r.left - t / 2 - (down ? down.grab : 0)) / (r.width - t);
+    };
+    el.addEventListener('pointerdown', function (e) {
+      if (e.button) return;
+      down = { id: e.pointerId, grab: 0 };
+      try { el.setPointerCapture(e.pointerId); } catch (_) {}
+      if (thumb && !capsule) { // respect the grab offset when the thumb itself is grabbed
+        var tr = thumb.getBoundingClientRect();
+        if (e.clientX >= tr.left - 10 && e.clientX <= tr.right + 10) down.grab = e.clientX - (tr.left + tr.width / 2);
+      } else if (vertical) {
+        // capsule sliders: keep the grab offset too (no jump on touch)
+        down.grab = 0; down.rel = raw(e) - st.v;
+      } else { down.grab = 0; down.rel = raw(e) - st.v; }
+      el.classList.add('is-pressed');
+      sTs.set(1.35, { response: 0.22 });
+      sP.set(1, { response: 0.16 });
+      if (capsule) { sSx.set(vertical ? 1.06 : 1.02, { response: 0.22 }); sSy.set(vertical ? 1.02 : 1.06, { response: 0.22 }); }
+      move(e, true);
+      e.preventDefault();
+    });
+    var move = function (e, first) {
+      var p = raw(e) - (down.rel || 0);
+      // if it was a tap away from the thumb, the value jumps under the finger (thin slider)
+      if (first && !capsule && down.rel == null && down.grab === 0) { down.rel = 0; }
+      setV(p, true);
+      // past the ends: the whole slider stretches like it's elastic
+      var over = p < 0 ? p : p > 1 ? p - 1 : 0;
+      var len = vertical ? track.offsetHeight : track.offsetWidth;
+      var px = rubber(over * len, 50, 0.55);             // px of visual overshoot (soft, capped ~27px)
+      var s = 1 + Math.abs(px) / len * 0.4;
+      var origin = vertical ? (over < 0 ? '50% 0%' : '50% 100%') : (over < 0 ? '100% 50%' : '0% 50%');
+      setVar(el, '--lg-origin', origin);
+      if (vertical) sSy.set(capsule ? s * 1.0 : s, { response: 0.14 }); else sSx.set(s, { response: 0.14 });
+      if (thumb && !capsule) sTx.set(px * 0.25, { response: 0.14 });
+    };
+    el.addEventListener('pointermove', function (e) { if (down && e.pointerId === down.id) move(e); });
+    var up = function (e) {
+      if (!down || (e && e.pointerId !== down.id)) return;
+      down = null; el.classList.remove('is-pressed');
+      sTs.set(1, { response: 0.4, damping: 0.65 });
+      sSx.set(1, { response: 0.42, damping: 0.6 }); sSy.set(1, { response: 0.42, damping: 0.6 });
+      sTx.set(0, { response: 0.42, damping: 0.6 });
+      sP.set(0, { response: 0.45 });
+      el.dispatchEvent(new CustomEvent('lg-change', { detail: st.v, bubbles: true }));
+    };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    apply();
+    el.lgSet = function (nv) { setV(nv, false); };
+  }
+
+  /* ---------------------------------------------------------------------- */
+  function init(root) {
+    root = root || document;
+    root.querySelectorAll('.lg-slider').forEach(function (el) { if (!el.lgSet) slider(el); });
+    root.querySelectorAll('.lg-toggle').forEach(function (el) { if (!el.lgSet) toggle(el); });
+    root.querySelectorAll('.lg-tabbar').forEach(function (el) { if (!el.lgSelect) pillGroup(el, '.lg-tab'); });
+    root.querySelectorAll('.lg-seg').forEach(function (el) { if (!el.lgSelect) pillGroup(el, '.lg-seg-item'); });
+    root.querySelectorAll('.lg-btn, .lg-card[data-press], .lg[data-press]').forEach(function (el) { if (!el._lgState) pressable(el); });
+  }
+  window.LG = { init: init, Spring: Spring, observe: function (fn) { observers.push(fn); }, afterFrame: function (fn) { afterFrame.push(fn); }, rubber: rubber, project: project };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { init(); });
+  else init();
+})();
+</script>
+<script>
+  (function(){
+    var bar = document.querySelector('.lg-tabbar');
+    var tabs = Array.prototype.slice.call(bar.querySelectorAll('.lg-tab'));
+    var views = tabs.map(function(t){ return document.getElementById(t.dataset.view); });
+    function show(i){
+      views.forEach(function(v,k){ if(v) v.classList.toggle('is-active', k===i); });
+      var active = views[i]; if(active) active.scrollTop = 0;
+    }
+    // the glass engine fires lg-change with the selected index
+    bar.addEventListener('lg-change', function(e){ show(e.detail|0); });
+    // fallback for no-motion / direct taps
+    tabs.forEach(function(t,i){ t.addEventListener('click', function(){ show(i); }); });
+  })();
+</script>

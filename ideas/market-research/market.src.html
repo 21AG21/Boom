@@ -1,0 +1,402 @@
+<title>Fidget-Tier Market Read</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
+<style>/*__LG_CSS__*/</style>
+
+<style>
+  :root{
+    --ground:#f4f4f5; --wall:#ffffff;
+    --ink:#0a0a0b; --ink-soft:#6a6a70; --muted:#9c9ca3;
+    --hair:rgba(10,10,12,.13); --hair-soft:rgba(10,10,12,.07);
+
+    --t-hero:clamp(38px,9.5vw,74px);
+    --t-big:clamp(34px,8.5vw,60px);
+    --t-title:clamp(23px,5.4vw,33px);
+    --t-body:clamp(15px,2.2vw,17px);
+    --t-label:14px;
+    --t-cap:12.5px;
+    --pad:22px;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --ground:#000000; --wall:#161618;
+    --ink:#f6f6f8; --ink-soft:#a0a0a8; --muted:#67676f;
+    --hair:rgba(255,255,255,.14); --hair-soft:rgba(255,255,255,.08);
+  }}
+  :root[data-theme="dark"]{
+    --ground:#000000; --wall:#161618;
+    --ink:#f6f6f8; --ink-soft:#a0a0a8; --muted:#67676f;
+    --hair:rgba(255,255,255,.14); --hair-soft:rgba(255,255,255,.08);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ overflow-x:hidden; max-width:100vw; }
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font:var(--t-body)/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    -webkit-tap-highlight-color:transparent; user-select:none;
+    touch-action:manipulation;
+  }
+  h1,h2,h3,p{ margin:0; }
+
+  #app{ position:fixed; inset:0; }
+  .view{
+    position:absolute; inset:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    padding:calc(env(safe-area-inset-top) + 30px)
+            calc(env(safe-area-inset-right) + var(--pad))
+            calc(env(safe-area-inset-bottom) + 128px)
+            calc(env(safe-area-inset-left) + var(--pad));
+    display:none;
+  }
+  .view.is-active{ display:block; }
+  .wrap{ max-width:1160px; margin:0 auto; }
+
+  /* headers */
+  .eyebrow{ font-size:var(--t-cap); font-weight:600; letter-spacing:.02em; color:var(--ink-soft); }
+  .hero{ font-size:var(--t-hero); font-weight:450; letter-spacing:-.035em; line-height:1.08; margin:8px 0 0; }
+  .hero .em{ font-weight:660; }
+  .sub{ font-size:var(--t-body); color:var(--ink-soft); max-width:60ch; margin:16px 0 0; line-height:1.5; }
+
+  .rule{ height:1px; background:var(--hair-soft); border:0; margin:36px 0; }
+  .sec-label{ font-size:var(--t-label); font-weight:650; color:var(--ink-soft); margin:0 0 22px; }
+
+  /* big-number metric atom */
+  .metrics{ display:grid; grid-template-columns:1fr; gap:34px; }
+  @media (min-width:640px){ .metrics{ grid-template-columns:1fr 1fr; gap:40px 48px; } }
+  @media (min-width:1024px){ .metrics{ grid-template-columns:repeat(4,1fr); } }
+  .metric{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .metric .k{ font-size:var(--t-label); font-weight:640; color:var(--ink-soft); }
+  .metric .v{ font-size:var(--t-big); font-weight:600; letter-spacing:-.03em; line-height:1.12;
+              font-variant-numeric:tabular-nums; }
+  .metric .n{ font-size:var(--t-cap); color:var(--muted); line-height:1.45; }
+
+  /* horizontal bars */
+  .bars{ display:flex; flex-direction:column; gap:26px; }
+  .bar{ display:flex; flex-direction:column; gap:9px; }
+  .bar-top{ display:flex; align-items:baseline; justify-content:space-between; gap:14px; }
+  .bar-k{ font-size:var(--t-label); font-weight:560; color:var(--ink-soft); min-width:0;
+          white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-v{ font-size:clamp(19px,4vw,26px); font-weight:640; letter-spacing:-.02em;
+          font-variant-numeric:tabular-nums; flex:none; }
+  .bar-track{ height:10px; background:var(--hair-soft); border-radius:5px; overflow:hidden; }
+  .bar-fill{ display:block; height:100%; background:var(--ink); border-radius:5px; }
+  .bar.lead .bar-k{ color:var(--ink); font-weight:680; }
+  .bar.lead .bar-k::before{ content:"● "; font-size:.7em; }
+
+  /* vertical columns (a time series) */
+  .colchart{ margin-top:8px; }
+  .cols{ display:flex; align-items:flex-end; gap:clamp(8px,2.5vw,22px); height:230px; }
+  .col{ flex:1 1 0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+        gap:8px; height:100%; min-width:0; }
+  .col-v{ font-size:var(--t-cap); font-weight:640; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .col-bar{ width:100%; max-width:52px; background:var(--ink); border-radius:5px 5px 0 0; }
+  .col.soft .col-bar{ background:var(--muted); }
+  .col-y{ font-size:var(--t-cap); color:var(--muted); font-variant-numeric:tabular-nums; }
+
+  /* ledger rows */
+  .ledger{ display:flex; flex-direction:column; }
+  .lrow{ display:flex; align-items:baseline; justify-content:space-between; gap:18px;
+         padding:20px 0; border-top:1px solid var(--hair-soft); }
+  .lrow:first-child{ border-top:0; }
+  .lrow .lk{ min-width:0; }
+  .lrow .name{ font-size:clamp(19px,4.4vw,25px); font-weight:520; letter-spacing:-.02em; line-height:1.15; }
+  .lrow .desc{ font-size:var(--t-cap); color:var(--muted); margin-top:4px; line-height:1.45; max-width:46ch; }
+  .lrow .price{ font-size:clamp(22px,5vw,30px); font-weight:660; letter-spacing:-.02em;
+                font-variant-numeric:tabular-nums; flex:none; text-align:right; }
+  .lrow .price .u{ font-size:.5em; font-weight:600; color:var(--muted); }
+  .lrow.lead .name{ font-weight:700; }
+  .lrow.lead .name::before{ content:"● "; font-size:.6em; vertical-align:middle; }
+
+  /* trend rows */
+  .trends{ display:flex; flex-direction:column; gap:30px; }
+  .trend{ display:flex; flex-direction:column; gap:7px; }
+  .trend .tk{ font-size:var(--t-label); font-weight:640; color:var(--ink-soft); }
+  .trend .tv{ font-size:clamp(18px,3.4vw,23px); font-weight:460; letter-spacing:-.02em; line-height:1.28; }
+  .trend .tn{ font-size:var(--t-cap); color:var(--muted); margin-top:2px; }
+
+  /* the one loud block */
+  .note{ background:var(--ink); color:var(--ground); border-radius:18px;
+         padding:24px 24px; margin:2px 0 0; }
+  .note .nt{ font-size:clamp(22px,5vw,32px); font-weight:640; letter-spacing:-.02em; line-height:1.16; }
+  .note .ns{ font-size:var(--t-body); opacity:.82; margin-top:12px; line-height:1.5; }
+
+  .foot{ font-size:var(--t-cap); color:var(--muted); line-height:1.7; margin-top:6px; }
+
+  /* tab bar */
+  .lg-tabbar{ position:fixed; left:50%; transform:translateX(-50%);
+              bottom:calc(env(safe-area-inset-bottom) + 14px); z-index:60; }
+
+  a{ color:inherit; text-underline-offset:3px; text-decoration-thickness:1px; text-decoration-color:var(--hair); }
+  @media (prefers-reduced-motion:reduce){ *{ animation:none!important; transition:none!important; } }
+</style>
+
+<div id="app">
+
+  <!-- ========== MARKETS ========== -->
+  <section class="view is-active" id="v-markets">
+    <div class="wrap">
+      <p class="eyebrow">Market read · Aug 2026 · the arenas</p>
+      <h1 class="hero">Four markets a<br><span class="em">fidget-tier</span> object can enter.</h1>
+      <p class="sub">The spinner proved a $0.50 part can become a global craze. These are the pools that a cheap, tactile, shareable object could pull from in 2026 — sized, with their growth.</p>
+
+      <hr class="rule">
+      <p class="sec-label">Market size · latest year</p>
+      <div class="metrics">
+        <div class="metric">
+          <span class="k">Fidget toys</span>
+          <span class="v">$9.6B</span>
+          <span class="n">2026 → $17.7B by 2034 · ~8% CAGR · the impulse channel</span>
+        </div>
+        <div class="metric">
+          <span class="k">Blind-box collectibles</span>
+          <span class="v">$17B</span>
+          <span class="n">2024 → $38B by 2032 · ~9.5% CAGR · the restock engine</span>
+        </div>
+        <div class="metric">
+          <span class="k">Mental-health devices</span>
+          <span class="v">$8.2B</span>
+          <span class="n">2025 → $59.6B by 2035 · ~22% CAGR</span>
+        </div>
+        <div class="metric">
+          <span class="k">Plantable / eco-novelty</span>
+          <span class="v">$155M</span>
+          <span class="n">2025 → $384M by 2034 · ~11% CAGR</span>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <p class="sec-label">The opportunity, framed</p>
+      <div class="ledger">
+        <div class="lrow">
+          <div class="lk"><div class="name">Total pool</div>
+            <div class="desc">Fidget impulse spend plus anxiety self-care — tens of billions, growing every year.</div></div>
+          <div class="price">$35B<span class="u">+</span></div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Serviceable</div>
+            <div class="desc">Handheld tactile calm + collectible desk objects. Smaller, but proven — see the next tab.</div></div>
+          <div class="price">$2–4B</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Obtainable, 3-yr</div>
+            <div class="desc">A conservative 0.02–0.05% of the fidget market alone. The upside case is the spinner's own history.</div></div>
+          <div class="price">$1.6–4M</div>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <div class="note">
+        <div class="nt">The spinner peaked at $2.2B and ~300M units — in one year.</div>
+        <div class="ns">2017. It won on tactility and timing, not technology. That is the ceiling these ideas are underwriting against — not the base case, but the reason the base case is worth chasing.</div>
+      </div>
+      <p class="foot">Sizes vary 2–3× by research firm and scope; figures are the most-cited values, rounded, with sources on the Verdict tab.</p>
+    </div>
+  </section>
+
+  <!-- ========== RIVALS ========== -->
+  <section class="view" id="v-rivals">
+    <div class="wrap">
+      <p class="eyebrow">Market read · handheld calm devices</p>
+      <h1 class="hero">The category is <span class="em">already sold</span> — at roughly 5× the price.</h1>
+      <p class="sub">A handheld device that paces your breathing through touch is not hypothetical. People buy it today. Every rival sits far above an impulse price — which is the whole opening.</p>
+
+      <hr class="rule">
+      <p class="sec-label">Price, by device (USD)</p>
+      <div class="bars">
+        <div class="bar lead">
+          <div class="bar-top"><span class="bar-k">Breathe Stone · target</span><span class="bar-v">$34</span></div>
+          <div class="bar-track"><span class="bar-fill" style="width:9.7%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="bar-top"><span class="bar-k">Core · Hyperice</span><span class="bar-v">$159</span></div>
+          <div class="bar-track"><span class="bar-fill" style="width:45.6%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="bar-top"><span class="bar-k">Moonbird</span><span class="bar-v">$199</span></div>
+          <div class="bar-track"><span class="bar-fill" style="width:57%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="bar-top"><span class="bar-k">Sensate</span><span class="bar-v">$299</span></div>
+          <div class="bar-track"><span class="bar-fill" style="width:85.7%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="bar-top"><span class="bar-k">Apollo Neuro</span><span class="bar-v">$349</span></div>
+          <div class="bar-track"><span class="bar-fill" style="width:100%"></span></div>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <p class="sec-label">Who's in the ring</p>
+      <div class="ledger">
+        <div class="lrow lead">
+          <div class="lk"><div class="name">Moonbird</div>
+            <div class="desc">A silicone device that expands and contracts in your hand to pace breathing. No subscription. The closest thing that exists — and the proof demand is real.</div></div>
+          <div class="price">$199</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Core · Hyperice</div>
+            <div class="desc">Handheld meditation trainer with a built-in ECG sensor. The cheapest handheld rival — still nearly 5× the target price.</div></div>
+          <div class="price">$159</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Sensate</div>
+            <div class="desc">Chest-placed infrasonic device for vagus-nerve calming, session-based.</div></div>
+          <div class="price">$299</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Apollo Neuro</div>
+            <div class="desc">All-day wearable delivering gentle vibration to improve HRV. The clinical-trial leader.</div></div>
+          <div class="price">$349</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Calm · Headspace</div>
+            <div class="desc">Software. Guided breathing on a screen — the thing an anti-screen object competes against.</div></div>
+          <div class="price">$70<span class="u">/yr</span></div>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <div class="note">
+        <div class="nt">Nobody serves the $30 shelf, or the waiting room.</div>
+        <div class="ns">A $199 gadget can't be an impulse buy, a gift, or a bulk kit for an ER or an airline. That empty price band and those closed channels are the wedge.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TRENDS ========== -->
+  <section class="view" id="v-trends">
+    <div class="wrap">
+      <p class="eyebrow">Market read · the tailwinds</p>
+      <h1 class="hero">Three currents all<br>pushing the <span class="em">same way</span>.</h1>
+      <p class="sub">A product doesn't go vertical on its own — it rides a moment. In 2026 three consumer currents converge on cheap, tactile, analog, collectible objects.</p>
+
+      <hr class="rule">
+      <p class="sec-label">Pop Mart annual revenue · RMB bn</p>
+      <div class="colchart">
+        <div class="cols">
+          <div class="col soft"><span class="col-v">2.5</span><span class="col-bar" style="height:7%"></span><span class="col-y">2020</span></div>
+          <div class="col soft"><span class="col-v">4.5</span><span class="col-bar" style="height:12%"></span><span class="col-y">2021</span></div>
+          <div class="col soft"><span class="col-v">4.6</span><span class="col-bar" style="height:12%"></span><span class="col-y">2022</span></div>
+          <div class="col soft"><span class="col-v">6.3</span><span class="col-bar" style="height:17%"></span><span class="col-y">2023</span></div>
+          <div class="col soft"><span class="col-v">13.0</span><span class="col-bar" style="height:35%"></span><span class="col-y">2024</span></div>
+          <div class="col"><span class="col-v">37.1</span><span class="col-bar" style="height:100%"></span><span class="col-y">2025</span></div>
+        </div>
+      </div>
+      <p class="foot">Pop Mart, maker of Labubu, grew revenue ~185% in 2025 to RMB 37.1B (~$5.4B). The blind-box collectible loop is the biggest consumer-object story of the decade.</p>
+
+      <hr class="rule">
+      <p class="sec-label">What's moving</p>
+      <div class="trends">
+        <div class="trend">
+          <span class="tk">Screen fatigue</span>
+          <span class="tv">"Dopamine detox" and digital-wellbeing went mainstream — people are actively buying <em>dumb</em>, analog objects to get off the screen.</span>
+          <span class="tn">Offline time is now treated as a status symbol among Gen Z and Alpha.</span>
+        </div>
+        <div class="trend">
+          <span class="tk">The analog backlash</span>
+          <span class="tv">Dumbphones, wired earbuds, film cameras, paper planners. Anything that isn't another app is having a moment.</span>
+          <span class="tn">Brick-phone purchases among 18–24s up 148% (2021→2024); dumbphone sales up 68% in early Jan 2026.</span>
+        </div>
+        <div class="trend">
+          <span class="tk">Collectible mania</span>
+          <span class="tv">Labubu made blind-box collecting a global adult habit. The "collect-them-all" loop is proven at scale.</span>
+          <span class="tn">Pop Mart cleared $5B in 2025 (+185%); the Labubu line alone grew 366%; eBay Labubu searches up 2,600%.</span>
+        </div>
+        <div class="trend">
+          <span class="tk">Who's spending</span>
+          <span class="tv">"Kidults" — adults buying toys for themselves — are now roughly a quarter of the entire US toy market.</span>
+          <span class="tn">~25% of US toy sales in 2025. Gen Z is the megaphone; adults are the wallet.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== VERDICT ========== -->
+  <section class="view" id="v-verdict">
+    <div class="wrap">
+      <p class="eyebrow">Market read · the call</p>
+      <h1 class="hero">Demand is proven.<br>The gap is <span class="em">price and form</span>.</h1>
+      <p class="sub">Put the three tabs together and the read is unusually clean for an early idea.</p>
+
+      <hr class="rule">
+      <div class="ledger">
+        <div class="lrow">
+          <div class="lk"><div class="name">Demand — proven</div>
+            <div class="desc">Moonbird already sells a handheld breathing pacer at $199. The category isn't a bet; the price point is.</div></div>
+          <div class="price">✓</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Engine — proven</div>
+            <div class="desc">The blind-box restock loop drives billions. A collectible layer turns one sale into many.</div></div>
+          <div class="price">✓</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">Timing — proven</div>
+            <div class="desc">Screen fatigue and the analog backlash are the exact tailwind a no-screen tactile object needs.</div></div>
+          <div class="price">✓</div>
+        </div>
+        <div class="lrow">
+          <div class="lk"><div class="name">The open question</div>
+            <div class="desc">Can it be made cheap enough — a ~$12 COGS, ~$34 retail — to own the shelf the incumbents left empty?</div></div>
+          <div class="price">?</div>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <div class="note">
+        <div class="nt">Undercut on price, win on form, open a channel they can't reach.</div>
+        <div class="ns">$34 not $199. A stone in your pocket, not a gadget in a case. And a $5 kinetic version for the waiting rooms and airlines a premium device will never touch.</div>
+      </div>
+
+      <hr class="rule">
+      <p class="sec-label">Sources</p>
+      <p class="foot">
+        Fidget toys — Fortune Business Insights, Verified Market Research (2025–26).
+        Blind-box — Verified Market Research (2024–32); Pop Mart revenue — Statista, GMW, TechNode (FY2025).
+        Mental-health devices — BIS Research (2025–35).
+        Plantable packaging — USD Analytics, Grand View (2025–34).
+        Devices &amp; pricing — Fast Company / Tom's Guide (Moonbird), getsensate.com, apolloneuro.com, Hyperice (2025–26).
+        Trends — Retail Dive / The Toy Association (kidults), SlashGear (dumbphones), CNBC (Labubu).
+        Spinner peak — Business of Business (2017).
+        Syndicated market sizes vary 2–5× by firm; figures are rounded to the most-cited value with the range noted. Moonbird's price is review-corroborated (vendor site unreachable); one 2026 page lists $229.99 MSRP / $199.99 sale.
+      </p>
+    </div>
+  </section>
+
+  <!-- the one piece of chrome -->
+  <nav class="lg lg-bar lg-tabbar" role="tablist" aria-label="Sections">
+    <div class="lg-tab is-active" role="tab" aria-selected="true" data-view="v-markets">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V13"/><path d="M12 20V6"/><path d="M19 20v-9"/></g></svg>
+      <span>Markets</span>
+    </div>
+    <div class="lg-tab" role="tab" aria-selected="false" data-view="v-rivals">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/></svg>
+      <span>Rivals</span>
+    </div>
+    <div class="lg-tab" role="tab" aria-selected="false" data-view="v-trends">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15l4.5-4.5 3 3L18 6"/><path d="M14 6h4v4"/></g></svg>
+      <span>Trends</span>
+    </div>
+    <div class="lg-tab" role="tab" aria-selected="false" data-view="v-verdict">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 4.5h11l-2.2 4 2.2 4H6"/></g></svg>
+      <span>Verdict</span>
+    </div>
+  </nav>
+</div>
+
+<script>/*__LG_JS__*/</script>
+<script>
+  (function(){
+    var bar = document.querySelector('.lg-tabbar');
+    var tabs = Array.prototype.slice.call(bar.querySelectorAll('.lg-tab'));
+    var views = tabs.map(function(t){ return document.getElementById(t.dataset.view); });
+    function show(i){
+      views.forEach(function(v,k){ if(v) v.classList.toggle('is-active', k===i); });
+      var active = views[i]; if(active) active.scrollTop = 0;
+    }
+    // the glass engine fires lg-change with the selected index
+    bar.addEventListener('lg-change', function(e){ show(e.detail|0); });
+    // fallback for no-motion / direct taps
+    tabs.forEach(function(t,i){ t.addEventListener('click', function(){ show(i); }); });
+  })();
+</script>

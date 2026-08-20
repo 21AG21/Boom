@@ -56,7 +56,7 @@ proof and your first marketing asset.
 ## Week 4 — Protect it and post it
 
 **Goal:** a defensible position and a public signal.
-- **Provisional patent:** file a US provisional (~$130 micro-entity) on the
+- **Provisional patent:** file a US provisional (~$65 micro-entity) on the
   tactile-only respiratory pacer claim from the deep dive. It's cheap, buys
   you 12 months of "patent pending," and forces you to write the invention
   down precisely.
@@ -91,8 +91,8 @@ You're not starting from zero on any of them. You're starting from a lab.
 |---|---|
 | Filament + prints (10 shells) | ~$15 |
 | ESP32-C3 / servo / LiPo / charger (from repo BOM) | ~$20 |
-| US provisional patent (micro-entity) | ~$130 |
-| **Total to a patent-pending object in your hand** | **~$165** |
+| US provisional patent (micro-entity) | ~$65 |
+| **Total to a patent-pending object in your hand** | **~$100** |
 
-That's the whole bar. $165 and four weekends separates "I have ideas" from
+That's the whole bar. $100 and four weekends separates "I have ideas" from
 "I have a patent-pending product and footage of strangers wanting it."

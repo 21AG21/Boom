@@ -45,7 +45,7 @@ Three actuation paths, cheapest-to-quietest:
 3. **Wound spring + escapement** — *no electronics at all*; the bulk / B2B
    hero at ~$5 COGS.
 
-## Build it (four weekends, ~$165 — see [`../one-month-ship-plan.md`](../one-month-ship-plan.md))
+## Build it (four weekends, ~$100 — see [`../one-month-ship-plan.md`](../one-month-ship-plan.md))
 ```bash
 # 1. Generate the printable parts
 pip install trimesh manifold3d scipy numpy matplotlib

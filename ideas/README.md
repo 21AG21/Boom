@@ -41,11 +41,19 @@ Deep dives live in [`flagship-deep-dives.md`](flagship-deep-dives.md).
 A month-one shipping plan that reuses this repo's 3D-print pipeline lives
 in [`one-month-ship-plan.md`](one-month-ship-plan.md).
 
-| # | Idea | One-liner | Fidget Score |
-|---|---|---|---|
-| 1 | **Breathe Stone** | A palm stone that paces your breathing through touch alone — no screen, near-silent | ●●●●● |
-| 2 | **Focus Familiar** | A desk creature you feed your phone to; it glows while you focus, wilts if you cave | ●●●●○ |
-| 3 | **Seed Fidget** | A compostable fidget you plant when you're bored of it — it grows wildflowers | ●●●●○ |
+> **📦 Built out overnight →** Flagship #1, **Breathe Stone**, has been taken
+> from a vault page to a *startable project*: real printable STLs, working
+> firmware, a file-ready provisional patent, and grounded economics — all in
+> [`breathe-stone/`](breathe-stone/). The other two have full deep-dive
+> one-pagers ([`focus-familiar/`](focus-familiar/one-pager.md),
+> [`seed-fidget/`](seed-fidget/one-pager.md)). Start with the
+> [Founder's Brief](founders-brief.html).
+
+| # | Idea | One-liner | Fidget Score | Built out |
+|---|---|---|---|---|
+| 1 | **Breathe Stone** | A palm stone that paces your breathing through touch alone — no screen, near-silent | ●●●●● | ✅ [full project](breathe-stone/) |
+| 2 | **Focus Familiar** | A desk creature you feed your phone to; it glows while you focus, wilts if you cave | ●●●●○ | 📄 [one-pager](focus-familiar/one-pager.md) |
+| 3 | **Seed Fidget** | A compostable fidget you plant when you're bored of it — it grows wildflowers | ●●●●○ | 📄 [one-pager](seed-fidget/one-pager.md) |
 
 ---
 

@@ -1,0 +1,603 @@
+<title>The 2026 Idea Vault</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Space+Mono:wght@400;700&display=swap">
+
+<style>
+  :root{
+    --paper:#E9EBE4;
+    --surface:#F5F6F0;
+    --surface-2:#FCFCF8;
+    --ink:#191A2B;
+    --ink-soft:#54566B;
+    --ink-faint:#8A8C9E;
+    --money:#DD4A24;
+    --patent:#2E52D6;
+    --society:#0B9276;
+    --line:rgba(25,26,43,.14);
+    --line-strong:rgba(25,26,43,.28);
+    --shadow:rgba(25,26,43,.10);
+    --grain-blend:multiply;
+    --grain-op:.05;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#13141F;
+      --surface:#1B1D2B;
+      --surface-2:#212434;
+      --ink:#ECEAE1;
+      --ink-soft:#A6A8BE;
+      --ink-faint:#71738A;
+      --money:#FF7048;
+      --patent:#7C97FF;
+      --society:#2EC6A3;
+      --line:rgba(236,234,225,.15);
+      --line-strong:rgba(236,234,225,.30);
+      --shadow:rgba(0,0,0,.45);
+      --grain-blend:screen;
+      --grain-op:.045;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#13141F;
+    --surface:#1B1D2B;
+    --surface-2:#212434;
+    --ink:#ECEAE1;
+    --ink-soft:#A6A8BE;
+    --ink-faint:#71738A;
+    --money:#FF7048;
+    --patent:#7C97FF;
+    --society:#2EC6A3;
+    --line:rgba(236,234,225,.15);
+    --line-strong:rgba(236,234,225,.30);
+    --shadow:rgba(0,0,0,.45);
+    --grain-blend:screen;
+    --grain-op:.045;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink);
+    font-family:"Newsreader", Georgia, serif;
+    font-size:18px;
+    line-height:1.6;
+    font-optical-sizing:auto;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:9;
+    opacity:var(--grain-op);
+    mix-blend-mode:var(--grain-blend);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .mono{font-family:"Space Mono", ui-monospace, monospace}
+
+  a{color:inherit}
+  h1,h2,h3{font-family:"Bricolage Grotesque", system-ui, sans-serif;text-wrap:balance;margin:0;line-height:1.02}
+
+  /* ---------- Masthead ---------- */
+  .masthead{padding:64px 0 40px;position:relative}
+  .eyebrow{
+    font-family:"Space Mono", monospace;
+    font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-soft);
+    display:flex;gap:14px;align-items:center;flex-wrap:wrap;
+    margin-bottom:26px;
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--money);display:inline-block}
+  .masthead h1{
+    font-weight:800;
+    font-size:clamp(3.1rem,9vw,6.6rem);
+    letter-spacing:-.02em;
+  }
+  .masthead h1 .stroke{
+    color:transparent;
+    -webkit-text-stroke:2px var(--ink);
+    text-stroke:2px var(--ink);
+  }
+  .masthead h1 em{font-style:normal;color:var(--money)}
+  .lede{
+    font-size:clamp(1.15rem,2.4vw,1.5rem);
+    line-height:1.5;
+    max-width:38ch;
+    margin:30px 0 0;
+    color:var(--ink);
+  }
+  .lede b{font-weight:500;color:var(--money);font-style:italic;font-family:"Newsreader",serif}
+  .masthead-meta{
+    margin-top:34px;padding-top:22px;border-top:1px solid var(--line-strong);
+    display:flex;gap:30px 48px;flex-wrap:wrap;
+    font-family:"Space Mono",monospace;font-size:12.5px;color:var(--ink-soft);
+    letter-spacing:.02em;
+  }
+  .masthead-meta b{color:var(--ink);font-weight:700}
+
+  /* ---------- Section frames ---------- */
+  section{padding:46px 0}
+  .sec-head{
+    display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;
+    margin-bottom:30px;padding-bottom:14px;border-bottom:2px solid var(--ink);
+  }
+  .sec-num{font-family:"Space Mono",monospace;font-size:13px;color:var(--ink-soft);letter-spacing:.1em}
+  .sec-head h2{font-weight:700;font-size:clamp(1.5rem,3.6vw,2.3rem);letter-spacing:-.01em}
+  .sec-head p{margin:0;flex:1 1 240px;min-width:200px;color:var(--ink-soft);font-size:1rem;line-height:1.45}
+
+  /* ---------- The bar / legend ---------- */
+  .legend{
+    display:grid;grid-template-columns:1.4fr 1fr;gap:26px;
+  }
+  @media(max-width:760px){.legend{grid-template-columns:1fr}}
+  .traits{display:flex;flex-direction:column;gap:14px}
+  .trait{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:baseline}
+  .trait .k{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+  .trait .d{color:var(--ink-soft);font-size:.98rem;line-height:1.4}
+  .angle-key{
+    background:var(--surface);border:1px solid var(--line);border-radius:2px;padding:22px 24px;
+    align-self:start;
+  }
+  .angle-key h3{font-family:"Space Mono",monospace;font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:16px}
+  .angle-key ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px}
+  .angle-key li{display:flex;gap:12px;align-items:flex-start;font-size:.98rem;line-height:1.35}
+  .swatch{width:14px;height:14px;border-radius:3px;flex:none;margin-top:5px}
+  .swatch.money{background:var(--money)}
+  .swatch.patent{background:var(--patent)}
+  .swatch.society{background:var(--society)}
+  .angle-key b{font-family:"Space Mono",monospace;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+
+  /* ---------- Flagships ---------- */
+  .flags{display:flex;flex-direction:column;gap:22px}
+  .flag{
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-left:5px solid var(--money);
+    border-radius:2px;
+    padding:30px 32px;
+    display:grid;grid-template-columns:1fr auto;gap:8px 34px;
+    box-shadow:0 1px 0 var(--line);
+    position:relative;
+  }
+  .flag:nth-child(2){border-left-color:var(--patent)}
+  .flag:nth-child(3){border-left-color:var(--society)}
+  @media(max-width:720px){.flag{grid-template-columns:1fr;padding:26px 22px}}
+  .flag-id{
+    font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.14em;
+    color:var(--ink-soft);text-transform:uppercase;
+  }
+  .flag h3{font-weight:800;font-size:clamp(1.7rem,4vw,2.5rem);letter-spacing:-.02em;margin:10px 0 4px;grid-column:1/2}
+  .flag .tag{font-family:"Newsreader",serif;font-style:italic;color:var(--money);font-size:1.15rem;margin:0 0 18px;grid-column:1/2}
+  .flag:nth-child(2) .tag{color:var(--patent)}
+  .flag:nth-child(3) .tag{color:var(--society)}
+  .flag .body{grid-column:1/2;max-width:60ch}
+  .flag .body p{margin:0 0 14px}
+  .flag .why{font-size:.98rem;color:var(--ink-soft);border-left:2px solid var(--line-strong);padding-left:16px;margin:0 0 20px}
+  .flag .why b{color:var(--ink);font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:5px;font-weight:700}
+  .score{
+    grid-row:1/2;grid-column:2/3;justify-self:end;text-align:right;
+  }
+  @media(max-width:720px){.score{grid-row:auto;grid-column:1/2;justify-self:start;text-align:left;margin-top:8px}}
+  .score .lbl{font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:6px}
+  .dots{font-size:1.4rem;letter-spacing:2px;line-height:1;color:var(--money)}
+  .flag:nth-child(2) .dots{color:var(--patent)}
+  .flag:nth-child(3) .dots{color:var(--society)}
+  .dots .off{color:var(--line-strong)}
+
+  /* angle chips (shared) */
+  .angles{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .flag .angles{grid-column:1/2}
+  .angle{display:grid;grid-template-columns:78px 1fr;gap:14px;align-items:baseline;font-size:.96rem;line-height:1.4}
+  .angle .ak{font-family:"Space Mono",monospace;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding-top:2px}
+  .angle.m .ak{color:var(--money)} .angle.p .ak{color:var(--patent)} .angle.s .ak{color:var(--society)}
+  .angle .av{color:var(--ink-soft)}
+
+  /* ---------- Catalog grid ---------- */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+  @media(max-width:800px){.grid{grid-template-columns:1fr}}
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:2px;
+    padding:24px 24px 22px;display:flex;flex-direction:column;gap:14px;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .card:hover{transform:translateY(-3px);box-shadow:0 10px 24px -12px var(--shadow);border-color:var(--line-strong)}
+  .card-top{display:flex;align-items:baseline;gap:12px}
+  .card-id{font-family:"Space Mono",monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--money)}
+  .card--patent .card-id{color:var(--patent)}
+  .card--society .card-id{color:var(--society)}
+  .card h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:1.42rem;letter-spacing:-.01em}
+  .card .hook{font-style:italic;font-size:1.02rem;line-height:1.45;margin:0;color:var(--ink)}
+
+  /* mini meter */
+  .meter{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;margin-top:2px}
+  .meter .mk{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+  .meter .track{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+  .meter .fill{height:100%;background:var(--ink);border-radius:3px;display:block}
+
+  .card .angles{border-top:1px solid var(--line);padding-top:14px;margin-top:2px}
+  .card .angle{grid-template-columns:64px 1fr;font-size:.92rem}
+
+  /* ---------- Plays (C/D/E) ---------- */
+  .plays{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:800px){.plays{grid-template-columns:1fr}}
+  .play{
+    background:var(--surface);border:1px solid var(--line);border-radius:2px;padding:22px 22px;
+    display:flex;flex-direction:column;gap:9px;
+  }
+  .play .card-top{align-items:baseline}
+  .play h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:1.26rem}
+  .play p{margin:0;color:var(--ink-soft);font-size:.96rem;line-height:1.5}
+  .play .kicker{font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+  .play .repo{font-family:"Space Mono",monospace;font-size:11px;color:var(--society);letter-spacing:.02em}
+
+  /* ---------- Filter / close ---------- */
+  .filter{
+    background:var(--ink);color:var(--paper);border-radius:3px;
+    padding:44px 40px;margin-top:12px;
+    display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center;
+  }
+  @media(max-width:720px){.filter{grid-template-columns:1fr;padding:32px 24px}}
+  .filter h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;color:var(--paper);font-size:clamp(1.6rem,4vw,2.3rem);letter-spacing:-.01em}
+  .filter .tests{display:flex;flex-direction:column;gap:18px;margin-top:20px}
+  .filter .test{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:baseline}
+  .filter .test .n{font-family:"Space Mono",monospace;font-weight:700;color:var(--money);font-size:1.1rem}
+  .filter .test .t b{font-family:"Bricolage Grotesque",sans-serif;display:block;color:var(--paper);font-size:1.05rem}
+  .filter .test .t span{color:rgba(233,235,228,.72);font-size:.96rem}
+  .cost{
+    background:rgba(233,235,228,.06);border:1px solid rgba(233,235,228,.18);border-radius:2px;
+    padding:26px 26px;
+  }
+  .cost .lbl{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(233,235,228,.6)}
+  .cost .big{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:3.4rem;color:var(--money);line-height:1;margin:8px 0 6px}
+  .cost p{margin:0;color:rgba(233,235,228,.82);font-size:.98rem;line-height:1.5}
+
+  footer{padding:40px 0 70px;border-top:1px solid var(--line);margin-top:20px}
+  footer .mono{font-size:12.5px;color:var(--ink-soft);letter-spacing:.02em;line-height:2}
+  footer b{color:var(--ink)}
+
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+  .reveal{opacity:0;transform:translateY(14px);animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards}
+  .reveal:nth-child(2){animation-delay:.06s}
+  .reveal:nth-child(3){animation-delay:.12s}
+  @keyframes rise{to{opacity:1;transform:none}}
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow"><span class="dot"></span> Morning brief · 20 Aug 2026 · private idea stash</div>
+    <h1 class="reveal">The 2026<br><span class="stroke">Idea</span> <em>Vault</em></h1>
+    <p class="lede reveal">A stash built to clear one bar: <b>could this be the next fidget spinner?</b> Cheap to make, understood in three seconds, impossible to put down, sold in a single video.</p>
+    <div class="masthead-meta reveal">
+      <span><b>17</b> ideas</span>
+      <span><b>3</b> flagships to build first</span>
+      <span><b>3</b> lenses · money / patent / society</span>
+      <span><b>$165</b> to a patent-pending object</span>
+    </div>
+  </header>
+
+  <!-- THE BAR -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2>The bar</h2>
+      <p>The spinner won on tactility and timing, not technology. Every idea here is scored on the five traits that made it unstoppable — and read through three lenses.</p>
+    </div>
+    <div class="legend">
+      <div class="traits">
+        <div class="trait"><span class="k">Cheap</span><span class="d">Bill of materials under ~$5; retails in the $15–40 impulse range.</span></div>
+        <div class="trait"><span class="k">Instant</span><span class="d">Understood in three seconds. No manual, no app required.</span></div>
+        <div class="trait"><span class="k">Tactile</span><span class="d">Rewards the hand — you don't want to stop touching it.</span></div>
+        <div class="trait"><span class="k">Shareable</span><span class="d">One eight-second video does the selling.</span></div>
+        <div class="trait"><span class="k">Restock</span><span class="d">A reason to buy the next one — collectible, consumable, modular.</span></div>
+      </div>
+      <div class="angle-key">
+        <h3>Three lenses</h3>
+        <ul>
+          <li><span class="swatch money"></span><span><b style="color:var(--money)">Money</b><br>How it actually earns — the model, not just "sell it."</span></li>
+          <li><span class="swatch patent"></span><span><b style="color:var(--patent)">Patent</b><br>The defensible, filable angle — form, mechanism, or method.</span></li>
+          <li><span class="swatch society"></span><span><b style="color:var(--society)">Society</b><br>Who it genuinely helps, beyond the buyer.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLAGSHIPS -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2>The flagship three</h2>
+      <p>Build these first. Deliberately diverse — one wellness, one behavioral, one climate — so the portfolio never rides on a single trend.</p>
+    </div>
+    <div class="flags">
+
+      <article class="flag">
+        <div class="flag-id">Flagship 01 · wellness</div>
+        <div class="score"><span class="lbl">Fidget score</span><span class="dots">●●●●●</span></div>
+        <h3>Breathe Stone</h3>
+        <p class="tag">"A worry stone that breathes with you — so you breathe with it."</p>
+        <div class="body">
+          <p>A palm stone with a domed pad that slowly swells and falls on a 4-7-8 cadence. Rest your thumb on it and, without thinking, your breath entrains to the rise and fall. No screen. No notification. Near-silent.</p>
+        </div>
+        <p class="why"><b>Why now</b>The only anxiety tools today are apps that add another screen to the problem. A calm object with zero UI is the contrarian — and correct — bet for a burnt-out, screen-fatigued 2026.</p>
+        <ul class="angles">
+          <li class="angle m"><span class="ak">Money</span><span class="av">$29 impulse — but the real business is B2B: airline fear-of-flying kits, ER and dental waiting rooms, therapist bulk orders that reorder.</span></li>
+          <li class="angle p"><span class="ak">Patent</span><span class="av">A tactile-only respiratory pacer at a power budget low enough to run kinetic. Existing breathing trainers are visual or audible — never touch-only.</span></li>
+          <li class="angle s"><span class="ak">Society</span><span class="av">Paced breathing for the people an app can't reach: kids, dementia patients, non-verbal users, anyone mid-panic in public.</span></li>
+        </ul>
+      </article>
+
+      <article class="flag">
+        <div class="flag-id">Flagship 02 · behavioral</div>
+        <div class="score"><span class="lbl">Fidget score</span><span class="dots">●●●●<span class="off">○</span></span></div>
+        <h3>Focus Familiar</h3>
+        <p class="tag">"Feed it your phone. It glows while you focus — and wilts the second you cave."</p>
+        <div class="body">
+          <p>A desk creature with a slot in its belly. Slide your phone in and it wakes up and glows; pull it out early and it visibly wilts. <em>Forest</em>, the focus app, turned into a physical companion you'd feel guilty abandoning.</p>
+        </div>
+        <p class="why"><b>Why now</b>It marries the dopamine-detox anxiety to the blind-box collectible mania (Labubu, Smiskis). Parents want to buy it; the collectible loop makes kids want it.</p>
+        <ul class="angles">
+          <li class="angle m"><span class="ak">Money</span><span class="av">$35 base, but the engine is $9–12 blind-box creatures and rares — razor-and-blades fused to a socially-approved behavior.</span></li>
+          <li class="angle p"><span class="ak">Patent</span><span class="av">A focus companion whose expressive state is driven by the continuous presence — or early removal — of a stowed phone. The penalty animation is the defensible core.</span></li>
+          <li class="angle s"><span class="ak">Society</span><span class="av">A non-punitive way for families to cut screen time — it makes phone-down the fun choice, not the nagged one.</span></li>
+        </ul>
+      </article>
+
+      <article class="flag">
+        <div class="flag-id">Flagship 03 · climate</div>
+        <div class="score"><span class="lbl">Fidget score</span><span class="dots">●●●●<span class="off">○</span></span></div>
+        <h3>Seed Fidget</h3>
+        <p class="tag">"Fidget with it for a month. When you're bored, plant it — it grows wildflowers."</p>
+        <div class="body">
+          <p>A fully biodegradable fidget molded from a seed-embedded composite. Satisfying and durable enough to carry for weeks; when you're done, plant it and it sprouts. The <em>ending</em> is the shareable moment, not just the use.</p>
+        </div>
+        <p class="why"><b>Why now</b>Plantable goods already sell, but nobody has made a <em>fidget</em> — the ultimate throwaway-plastic object — out of one. The plant-and-timelapse is a video with a built-in beginning, middle, and end.</p>
+        <ul class="angles">
+          <li class="angle m"><span class="ak">Money</span><span class="av">$12 seasonal impulse; the volume play is wedding, conference, and corporate favors — swag that leaves flowers instead of landfill.</span></li>
+          <li class="angle p"><span class="ak">Patent</span><span class="av">A durable-yet-compostable seed-matrix composite that survives weeks of high-touch use and <em>then</em> reliably germinates — an unusual materials requirement.</span></li>
+          <li class="angle s"><span class="ak">Society</span><span class="av">Turns the archetypal disposable gadget net-positive: zero landfill, and every one plants pollinator habitat.</span></li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- TIER A -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2>Tier A — pure fidget</h2>
+      <p>Tactile novelty, scored on all five traits. The closest kin to the spinner itself.</p>
+    </div>
+    <div class="grid">
+
+      <article class="card">
+        <div class="card-top"><span class="card-id">A1</span><h3>Kinetic Fidget</h3></div>
+        <p class="hook">"It never needs charging — you charge it just by playing with it."</p>
+        <div class="meter">
+          <span class="mk">Cheap</span><span class="track"><span class="fill" style="width:60%"></span></span>
+          <span class="mk">Instant</span><span class="track"><span class="fill" style="width:100%"></span></span>
+          <span class="mk">Tactile</span><span class="track"><span class="fill" style="width:100%"></span></span>
+          <span class="mk">Share</span><span class="track"><span class="fill" style="width:100%"></span></span>
+          <span class="mk">Restock</span><span class="track"><span class="fill" style="width:40%"></span></span>
+        </div>
+        <ul class="angles">
+          <li class="angle m"><span class="ak">Money</span><span class="av">$24 impulse; a $39 "infinity" tier.</span></li>
+          <li class="angle p"><span class="ak">Patent</span><span class="av">Its idle animation is powered by <em>prior</em> fidgeting — a feedback loop no rechargeable toy has.</span></li>
+          <li class="angle s"><span class="ak">Society</span><span class="av">Zero-battery electronics teaching tool for classrooms.</span></li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <div class="card-top"><span class="card-id">A2</span><h3>Silent One</h3></div>
+        <p class="hook">"The fidget you can use in a meeting, a classroom, or a courtroom."</p>
+        <div class="meter">
+          <span class="mk">Cheap</span><span class="track"><span class="fill" style="width:80%"></span></span>
+          <span class="mk">Instant</span><span class="track"><span class="fill" style="width:100%"></span></span>
+          <span class="mk">Tactile</span><span class="track"><span class="fill" style="width:100%"></span></span>
+          <span class="mk">Share</span><span class="track"><span class="fill" style="width:60%"></span></span>
+          <span class="mk">Restock</span><span class="track"><span class="fill" style="width:60%"></span></span>
+        </div>
+        <ul class="angles">
+          <li class="angle m"><span class="ak">Money</span><span class="av">B2B bulk to schools, offices, therapists; $19 consumer.</span></li>
+          <li class="angle p"><span class="ak">Patent</span><span class="av">A magnetically-damped detent — the <em>feel</em> of a click with none of the sound.</span></li>
+          <li class="angle s"><span class="ak">Society</span><span class="av">Accommodation for kids who need to fidget but get punished for the noise.</span></li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <div class="card-top"><span class="card-id">A3</span><h3>Snap Ecosystem</h3></div>
+        <p class="hook">"Pokémon cards you can actually play with."</p>
+        <div class="meter">
+          <span class="mk">Cheap</span><span class="track"><span class="fill" style="width:80%"></span></span>
+          <span class="mk">Instant</span><span class="track"><span class="fill" style="width:100%"></span></span>
+          <span class="mk">Tactile</span><span class="track"><span class="fill" style="width:80%"></span></span>
+          <span class="mk">Share</span><span class="track"><span class="fill" style="width:80%"></span></span>
+          <span class="mk">Restock</span><span class="track"><span class="fill" style="width:100%"></span></span>
+        </div>
+        <ul class="angles">
+          <li class="angle m"><span class="ak">Money</span><span class="av">The $15 starter is bait; $6 modules forever, plus blind-box rares.</span></li>
+          <li class="angle p"><span class="ak">Patent</span><span class="av">A universal snap-spine interface and the module family around it.</span></li>
+          <li class="angle s"><span class="ak">Society</span><span class="av">Trade-and-swap culture — a low-cost social object for kids.</span></li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <div class="card-top"><span class="card-id">A4</span><h3>Ferro Timer</h3></div>
+        <p class="hook">"An hourglass, if the sand were alive."</p>
+        <div class="meter">
+          <span class="mk">Cheap</span><span class="track"><span class="fill" style="width:40%"></span></span>
+          <span class="mk">Instant</span><span class="track"><span class="fill" style="width:100%"></span></span>
+          <span class="mk">Tactile</span><span class="track"><span class="fill" style="width:60%"></span></span>
+          <span class="mk">Share</span><span class="track"><span class="fill" style="width:100%"></span></span>
+          <span class="mk">Restock</span><span class="track"><span class="fill" style="width:40%"></span></span>
+        </div>
+        <ul class="angles">
+          <li class="angle m"><span class="ak">Money</span><span class="av">$34 desk object; art tiers to $89.</span></li>
+          <li class="angle p"><span class="ak">Patent</span><span class="av">A programmable magnet path that runs named "moods" — bloom, spike, drip — on a loop.</span></li>
+          <li class="angle s"><span class="ak">Society</span><span class="av">Sensory-regulation object for autistic adults and anxiety.</span></li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- TIER B -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2>Tier B — passive health</h2>
+      <p>The 2026 insight: the winning health gadget has no battery, no app, no notification. Make the body the interface.</p>
+    </div>
+    <div class="grid">
+
+      <article class="card card--society">
+        <div class="card-top"><span class="card-id">B1</span><h3>Sun Bead</h3></div>
+        <p class="hook">"A friendship bracelet that tells you when to get out of the sun."</p>
+        <div class="meter">
+          <span class="mk">Cheap</span><span class="track"><span class="fill" style="width:100%"></span></span>
+          <span class="mk">Instant</span><span class="track"><span class="fill" style="width:80%"></span></span>
+          <span class="mk">Tactile</span><span class="track"><span class="fill" style="width:40%"></span></span>
+          <span class="mk">Share</span><span class="track"><span class="fill" style="width:60%"></span></span>
+          <span class="mk">Restock</span><span class="track"><span class="fill" style="width:60%"></span></span>
+        </div>
+        <ul class="angles">
+          <li class="angle m"><span class="ak">Money</span><span class="av">$12 seasonal; co-brand with sunscreen; parents-of-kids segment.</span></li>
+          <li class="angle p"><span class="ak">Patent</span><span class="av">A reversible bead calibrated to sunburn-causing UV, not just "any UV."</span></li>
+          <li class="angle s"><span class="ak">Society</span><span class="av">Melanoma is the most preventable common cancer — a $12 sun-dose sense for kids.</span></li>
+        </ul>
+      </article>
+
+      <article class="card card--patent">
+        <div class="card-top"><span class="card-id">B2</span><h3>Count Ring</h3></div>
+        <p class="hook">"Turn the ring, not your phone, to track your day."</p>
+        <div class="meter">
+          <span class="mk">Cheap</span><span class="track"><span class="fill" style="width:80%"></span></span>
+          <span class="mk">Instant</span><span class="track"><span class="fill" style="width:80%"></span></span>
+          <span class="mk">Tactile</span><span class="track"><span class="fill" style="width:100%"></span></span>
+          <span class="mk">Share</span><span class="track"><span class="fill" style="width:40%"></span></span>
+          <span class="mk">Restock</span><span class="track"><span class="fill" style="width:60%"></span></span>
+        </div>
+        <ul class="angles">
+          <li class="angle m"><span class="ak">Money</span><span class="av">$22; habit SKUs — hydration, quit-smoking, sobriety day-counter.</span></li>
+          <li class="angle p"><span class="ak">Patent</span><span class="av">A tactile-detent day-reset bezel and the family of habit dials.</span></li>
+          <li class="angle s"><span class="ak">Society</span><span class="av">A habit tool for people who don't want another surveilling app.</span></li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <div class="card-top"><span class="card-id">B3</span><h3>Slouch Pebble</h3></div>
+        <p class="hook">"It taps you when you slump — no battery, ever."</p>
+        <div class="meter">
+          <span class="mk">Cheap</span><span class="track"><span class="fill" style="width:80%"></span></span>
+          <span class="mk">Instant</span><span class="track"><span class="fill" style="width:60%"></span></span>
+          <span class="mk">Tactile</span><span class="track"><span class="fill" style="width:60%"></span></span>
+          <span class="mk">Share</span><span class="track"><span class="fill" style="width:40%"></span></span>
+          <span class="mk">Restock</span><span class="track"><span class="fill" style="width:40%"></span></span>
+        </div>
+        <ul class="angles">
+          <li class="angle m"><span class="ak">Money</span><span class="av">$18 desk-worker impulse; corporate wellness bulk.</span></li>
+          <li class="angle p"><span class="ak">Patent</span><span class="av">A passive, gravity-triggered alert keyed to <em>time-integrated</em> slouch, not instant angle.</span></li>
+          <li class="angle s"><span class="ak">Society</span><span class="av">A cheap ergonomic aid for a billion laptop-hunched workers.</span></li>
+        </ul>
+      </article>
+
+      <article class="card" style="justify-content:center;align-items:flex-start;gap:10px">
+        <div class="card-top"><span class="card-id" style="color:var(--ink-faint)">↘</span></div>
+        <h3 style="font-size:1.2rem">Design principle</h3>
+        <p class="hook" style="font-style:normal;color:var(--ink-soft)">Every Tier B winner removes electronics rather than adding them. The differentiation isn't the sensor — it's the <em>refusal</em> of a screen. Screen fatigue is the whole tailwind.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- PLAYS C/D/E -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <h2>Money plays &amp; bigger swings</h2>
+      <p>Less fidget-pure, more revenue and reach. Two of these ride the 3D-print pipeline already sitting in this repo.</p>
+    </div>
+    <div class="plays">
+
+      <article class="play card--money">
+        <div class="card-top"><span class="card-id">C1</span><span class="kicker">SaaS · repo leverage</span></div>
+        <h3>Fidgetsmith</h3>
+        <p>Snap any object — your pet, your logo — and get a manufacturable, balanced fidget STL in 30 seconds. Freemium download, print-and-ship marketplace cut, creator subscriptions.</p>
+        <p class="repo">↳ extends hardware/generate_stls.py into a product</p>
+      </article>
+
+      <article class="play card--money">
+        <div class="card-top"><span class="card-id">C2</span><span class="kicker">Subscription · digital</span></div>
+        <h3>Blind-Print</h3>
+        <p>A sealed mystery STL each week — you don't know which of the set you got until it prints. Digital scarcity, physical payoff, near-zero cost of goods. $9/mo, artist revenue-share.</p>
+      </article>
+
+      <article class="play card--patent">
+        <div class="card-top"><span class="card-id">C3</span><span class="kicker">Patent-heavy</span></div>
+        <h3>Proof-of-Hand</h3>
+        <p>A playful physical token that emits a time-based code when twisted in sequence — proving a real human did a real action. Bots can't twist a fidget. Events, ticketing, anti-scalper, classrooms.</p>
+      </article>
+
+      <article class="play card--society">
+        <div class="card-top"><span class="card-id">D2</span><span class="kicker">Society-first · B2B</span></div>
+        <h3>Calm Kit</h3>
+        <p>Breathe Stones and Silent Ones licensed in bulk to ERs, dentists, airplanes, DMV lines — places humans are anxious and bored on purpose. Recurring B2B that measurably lowers waiting-room stress.</p>
+      </article>
+
+      <article class="play card--patent">
+        <div class="card-top"><span class="card-id">E1</span><span class="kicker">Moonshot · materials</span></div>
+        <h3>Radiative-Cooling Carry</h3>
+        <p>Passive daytime radiative-cooling film — cools below ambient with zero energy — productized for tents, strollers, dog houses, lunch bags. Patent the consumer form factors and lamination.</p>
+      </article>
+
+      <article class="play card--patent">
+        <div class="card-top"><span class="card-id">E2</span><span class="kicker">Moonshot · thermal</span></div>
+        <h3>Cold Coaster</h3>
+        <p>A coaster charged in the freezer that holds a drink cold for 2+ hours via phase-change material. Patent the recharge-in-freezer enclosure and thermal path.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- FILTER -->
+  <section>
+    <div class="filter">
+      <div>
+        <h2>Before you fall in love</h2>
+        <div class="tests">
+          <div class="test"><span class="n">01</span><span class="t"><b>The elevator test</b><span>Can you sell it in one sentence before the doors open? If not, it's too complex.</span></span></div>
+          <div class="test"><span class="n">02</span><span class="t"><b>The thumb test</b><span>Would they keep touching it, unprompted, while you talk? If not, it's a gadget — not a fidget.</span></span></div>
+        </div>
+      </div>
+      <div class="cost">
+        <span class="lbl">The whole bar to clear</span>
+        <div class="big">$165</div>
+        <p>Ten printed shells, one servo-and-battery kit from this repo's parts list, and a micro-entity provisional patent. Four weekends from a page in this vault to a patent-pending object in your hand — full plan in <span class="mono" style="color:var(--money)">one-month-ship-plan.md</span>.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="mono">
+      <b>Where this lives</b> — committed to branch <b>claude/product-ideas-2026-ly8cox</b>, folder <b>ideas/</b><br>
+      README.md · flagship-deep-dives.md · one-month-ship-plan.md · vault.html<br>
+      The turret project was left untouched.
+    </div>
+  </footer>
+
+</div>

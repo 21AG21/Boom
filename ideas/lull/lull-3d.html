@@ -226,14 +226,14 @@
     { name:'cam',   mat:'cam',   faces: camFaces(7,3.6,3.6,54), rotY:true, exp:V(0,.15,0), label:'Cam — the breath shape', la:V(11,2,0) },
     { name:'follow',mat:'plate', faces: box(11,2,11,0,0,0).concat(cyl(1.6,7,10,'y',0,-4,0)), lift:true, exp:V(0,1,0),
                     label:'Follower (slip-clutch)', la:V(0,1,7) },
-    { name:'foam',  mat:'foam',  faces: sphereFaces(24,10,12.5,10,12.5,0,0,0.5), breatheP:true, exp:V(0,1.7,0),
-                    label:'Foam dome — breathes', la:V(0,9,0) },
+    { name:'foam',  mat:'foam',  faces: sphereFaces(30,13,18,12,18,0,0,0.5), breatheP:true, exp:V(0,1.7,0),
+                    label:'Foam dome — breathes', la:V(0,12,0) },
     { name:'gel',   mat:'gel',   faces: sphereFaces(20,10,8.5,7.5,8.5,0,0,1), exp:V(1,0,0),
                     label:'Gel lobe — fidget', la:V(27,2,0) },
     { name:'shell', mat:'shell', faces: sphereFaces(26,13,30,15.5,22), shell:true, exp:V(0,0,0) },
   ];
   // static base positions (added into faces at build for parts that aren't at origin)
-  const POS={ foam:V(0,13,0), gel:V(26,2,0) };
+  const POS={ foam:V(0,12,0), gel:V(26,2,0) };
   for(const p of parts){ const o=POS[p.name]; if(o){ p.faces=p.faces.map(f=>({v:f.v.map(v=>V(v.x+o.x,v.y+o.y,v.z+o.z))})); } }
 
   // ---------- camera ----------
@@ -272,7 +272,7 @@
     t0=now;
     const period=8.0;                       // one breath, seconds (calm but lively)
     const phase=(tAcc/period)%1;
-    const lvl=reduce?0.62:breath(phase);
+    const lvl=breath(phase);                 // phase only advances while playing (see tAcc)
     if(auto && !dragging && !reduce){ cam.yaw += 0.0016; }
 
     Lc=rot(light);
@@ -281,7 +281,9 @@
     ctx.fillRect(0,0,W,H);
 
     const camAng = phase*2*Math.PI;
-    const lift = 5.2*lvl;                    // dome/follower travel
+    const lift = 6.5*lvl;                    // follower/dome vertical travel
+    const swY = 1+0.45*lvl;                  // dome grows taller...
+    const swXZ = 1+0.30*lvl;                 // ...and puffs outward as it "inhales"
     const polys=[];
     for(const p of parts){
       const rgb=MAT[p.mat];
@@ -293,7 +295,7 @@
         const wv=f.v.map(v=>{
           let x=v.x,y=v.y,z=v.z;
           if(p.rotY){ const c=Math.cos(camAng),s=Math.sin(camAng); const nx=x*c+z*s, nz=-x*s+z*c; x=nx; z=nz; }
-          if(p.breatheP){ y=(y-13)*(1+0.14*lvl)+13+lift; }   // foam scales up from its base + lifts
+          if(p.breatheP){ x*=swXZ; z*=swXZ; y=(y-12)*swY+12+lift; }   // foam puffs out + rises from its base
           if(p.lift){ y+=lift; }
           // explode offset
           x+=p.exp.x*ex*22; y+=p.exp.y*ex*22; z+=p.exp.z*ex*22;
@@ -327,7 +329,7 @@
       for(const p of parts){
         if(!p.label) continue;
         let a=p.la; let y=a.y;
-        if(p.lift) y+=lift; if(p.breatheP) y=(a.y-13)*(1+0.14*lvl)+13+lift;
+        if(p.lift) y+=lift; if(p.breatheP) y=(a.y-12)*swY+12+lift;
         let wx=a.x+p.exp.x*explode*22, wy=y+p.exp.y*explode*22, wz=a.z+p.exp.z*explode*22;
         const r=rot(V(wx-cam.tx,wy-cam.ty,wz-cam.tz)); const pc=V(r.x,r.y,r.z-cam.dist);
         const zz=-pc.z; if(zz<1) continue;
@@ -345,7 +347,7 @@
       }
     }
 
-    document.getElementById('phase').textContent = reduce?'Paused':phaseName(phase);
+    document.getElementById('phase').textContent = playing?phaseName(phase):'Paused';
     requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);

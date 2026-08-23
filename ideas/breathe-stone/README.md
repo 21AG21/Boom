@@ -26,7 +26,8 @@ firmware, a provisional-patent draft, and grounded unit economics.
 
 | Folder | What it is | Status |
 |---|---|---|
-| [`hardware/`](hardware/) | Parametric STL generator (this repo's trimesh idiom), 5 watertight printable parts + assembly, and a preview render | ✅ generates & prints |
+| [`hardware/`](hardware/) | v1 — servo + crank. Parametric STL generator (this repo's trimesh idiom), 5 watertight parts + assembly, preview render | ✅ generates & prints |
+| [`hardware-v2/`](hardware-v2/) | **v2 — silent nitinol actuator.** No motor, 24 mm thin. STLs + SMA firmware + slicer-ready print profile + mechanism comparison | ✅ generates & prints |
 | [`firmware/`](firmware/) | ESP32-C3 sketch: silent 5-5 / 4-7-8 / box cadences, sine-eased, servo detaches through holds | ✅ flash-ready |
 | [`patent/`](patent/) | Full provisional draft, 20 claims, candid Moonbird prior-art analysis | ✅ file-ready (~$65) |
 | [`business/`](business/) | BOM across 3 build tiers, unit economics, and a phased go-to-market | ✅ |
@@ -40,10 +41,12 @@ stone is dead silent while the pad dwells (a commanded servo otherwise buzzes,
 which is unacceptable at 3 a.m.).
 
 Three actuation paths, cheapest-to-quietest:
-1. **Servo + crank** (the prototype here) — easiest to build tonight.
-2. **Nitinol wire** — silent, solid-state, thins the stone to ~22 mm.
+1. **Servo + crank** ([`hardware/`](hardware/)) — easiest to build tonight; proves the effect.
+2. **Nitinol wire** ([`hardware-v2/`](hardware-v2/)) — ✅ built: silent, solid-state, thins the stone to 24 mm. The retail unit.
 3. **Wound spring + escapement** — *no electronics at all*; the bulk / B2B
-   hero at ~$5 COGS.
+   hero at ~$5 COGS (the v3 for waiting-room Calm Kits).
+
+See [`hardware-v2/mechanism-options.md`](hardware-v2/mechanism-options.md) for the full decision.
 
 ## Build it (four weekends, ~$100 — see [`../one-month-ship-plan.md`](../one-month-ship-plan.md))
 ```bash

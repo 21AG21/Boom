@@ -1,0 +1,385 @@
+<title>Lull Mechanism</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
+<style>
+  :root{
+    --stage:#101216;
+    --panel:rgba(20,22,27,.72);
+    --ink:#eceef2;
+    --ink-soft:#9a9ea8;
+    --ink-faint:#63666f;
+    --hair:rgba(255,255,255,.12);
+    --hair-soft:rgba(255,255,255,.07);
+    --warm:#d2ab7d;      /* the foam dome — it breathes */
+    --cool:#54a69c;      /* the gel lobe — you fidget it */
+    --btn:rgba(255,255,255,.08);
+    --btn-on:rgba(255,255,255,.9);
+    --btn-on-ink:#15171c;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; overflow:hidden; background:var(--stage); }
+  body{
+    color:var(--ink);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased; user-select:none; -webkit-user-select:none;
+    touch-action:none;
+  }
+  .mono{ font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
+  canvas{ display:block; position:fixed; inset:0; width:100%; height:100%; }
+
+  /* top-left identity */
+  .head{ position:fixed; top:calc(env(safe-area-inset-top) + 18px); left:calc(env(safe-area-inset-left) + 20px);
+         z-index:5; pointer-events:none; max-width:min(70vw,420px); }
+  .eyebrow{ font-family:ui-monospace,monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+            color:var(--ink-faint); }
+  .head h1{ margin:6px 0 0; font-size:clamp(24px,5vw,34px); font-weight:600; letter-spacing:-.02em; }
+  .head p{ margin:8px 0 0; font-size:13.5px; color:var(--ink-soft); line-height:1.45; }
+
+  /* live breath readout, top-right */
+  .breath{ position:fixed; top:calc(env(safe-area-inset-top) + 18px); right:calc(env(safe-area-inset-right) + 20px);
+           z-index:5; text-align:right; pointer-events:none; }
+  .breath .phase{ font-size:clamp(20px,4.5vw,28px); font-weight:600; letter-spacing:-.01em; }
+  .breath .cad{ font-family:ui-monospace,monospace; font-size:11px; letter-spacing:.06em; color:var(--ink-faint); margin-top:3px; }
+
+  /* legend — the force path is a real sequence, so it's numbered */
+  .legend{ position:fixed; left:calc(env(safe-area-inset-left) + 20px); bottom:calc(env(safe-area-inset-bottom) + 96px);
+           z-index:5; background:var(--panel); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+           border:1px solid var(--hair-soft); border-radius:14px; padding:14px 16px; max-width:270px; }
+  .legend h2{ margin:0 0 10px; font-family:ui-monospace,monospace; font-size:10.5px; letter-spacing:.14em;
+              text-transform:uppercase; color:var(--ink-faint); font-weight:600; }
+  .legend ol{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px; }
+  .legend li{ display:grid; grid-template-columns:18px 1fr; gap:10px; align-items:baseline; font-size:13px; }
+  .legend li .n{ font-family:ui-monospace,monospace; font-size:11px; color:var(--ink-faint); }
+  .legend li b{ font-weight:600; }
+  .legend li span{ color:var(--ink-soft); }
+  .legend .sep{ height:1px; background:var(--hair-soft); margin:4px 0 2px; }
+  .legend .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; vertical-align:middle; margin-right:2px; }
+  .dot.warm{ background:var(--warm); } .dot.cool{ background:var(--cool); }
+
+  /* bottom controls */
+  .bar{ position:fixed; left:50%; transform:translateX(-50%);
+        bottom:calc(env(safe-area-inset-bottom) + 20px); z-index:6;
+        display:flex; align-items:center; gap:8px; padding:8px;
+        background:var(--panel); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+        border:1px solid var(--hair-soft); border-radius:16px; max-width:calc(100vw - 32px); }
+  .btn{ appearance:none; border:0; background:var(--btn); color:var(--ink);
+        font:inherit; font-size:13px; font-weight:560; padding:10px 14px; border-radius:11px;
+        cursor:pointer; white-space:nowrap; transition:transform .12s ease, background .15s ease; }
+  .btn:active{ transform:scale(.95); }
+  .btn.on{ background:var(--btn-on); color:var(--btn-on-ink); }
+  .btn.icon{ padding:10px 12px; }
+  .ex{ display:flex; align-items:center; gap:9px; padding:0 8px 0 10px; }
+  .ex label{ font-family:ui-monospace,monospace; font-size:11px; color:var(--ink-soft); letter-spacing:.04em; }
+  .ex input{ width:96px; accent-color:var(--ink); }
+  .hint{ position:fixed; left:50%; transform:translateX(-50%);
+         bottom:calc(env(safe-area-inset-bottom) + 74px); z-index:5;
+         font-family:ui-monospace,monospace; font-size:11px; color:var(--ink-faint);
+         opacity:.9; transition:opacity .6s ease; pointer-events:none; }
+  :focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  @media (max-width:560px){
+    .legend{ bottom:calc(env(safe-area-inset-bottom) + 88px); max-width:200px; padding:11px 13px; }
+    .head p{ display:none; }
+    .ex input{ width:70px; }
+    .btn{ padding:10px 11px; }
+  }
+</style>
+
+<canvas id="c"></canvas>
+
+<div class="head">
+  <div class="eyebrow">Lull · mechanism</div>
+  <h1>The breathing squishy</h1>
+  <p>Two jobs, two separate parts. Drag to rotate. The dome breathes; the cam's shape is the rhythm.</p>
+</div>
+
+<div class="breath">
+  <div class="phase" id="phase">Inhale</div>
+  <div class="cad mono">4-1-6 · ~5 breaths/min</div>
+</div>
+
+<div class="legend">
+  <h2>The breath path</h2>
+  <ol>
+    <li><span class="n">1</span><span><b>Motor</b> — turns slowly, steadily</span></li>
+    <li><span class="n">2</span><span><b>Cam</b> — its shape <i>is</i> the breath curve</span></li>
+    <li><span class="n">3</span><span><b>Follower</b> — rides the cam, slips if squeezed</span></li>
+    <li><span class="n">4</span><span><b><span class="dot warm"></span>Foam dome</b> — swells into your palm</span></li>
+    <div class="sep"></div>
+    <li><span class="n">+</span><span><b><span class="dot cool"></span>Gel lobe</b> — separate; you knead it</span></li>
+    <li><span class="n">+</span><span><b>2×AAA</b> — swappable, no charging</span></li>
+  </ol>
+</div>
+
+<div class="bar">
+  <button class="btn icon on" id="play" aria-label="Play or pause">Pause</button>
+  <button class="btn on" id="cut">Cutaway</button>
+  <button class="btn on" id="lab">Labels</button>
+  <div class="ex">
+    <label for="ex">Explode</label>
+    <input id="ex" type="range" min="0" max="1" step="0.01" value="0">
+  </div>
+  <button class="btn icon" id="reset" aria-label="Reset view">Reset</button>
+</div>
+<div class="hint mono" id="hint">drag to rotate · scroll to zoom</div>
+
+<script>
+"use strict";
+(function(){
+  const cv = document.getElementById('c');
+  const ctx = cv.getContext('2d');
+  const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  // ---------- tiny vec / math ----------
+  const V=(x,y,z)=>({x,y,z});
+  const sub=(a,b)=>V(a.x-b.x,a.y-b.y,a.z-b.z);
+  const cross=(a,b)=>V(a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x);
+  const norm=(a)=>{const l=Math.hypot(a.x,a.y,a.z)||1;return V(a.x/l,a.y/l,a.z/l);};
+  const dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z;
+
+  // ---------- geometry builders (local space, Y up) ----------
+  // each returns array of faces; a face is {v:[vec3...]}
+  function sphereFaces(nLong,nLat,sx,sy,sz,y0=0,latFrom=0,latTo=1){
+    const f=[];
+    for(let i=0;i<nLat;i++){
+      const t0=latFrom+(latTo-latFrom)*i/nLat, t1=latFrom+(latTo-latFrom)*(i+1)/nLat;
+      const p0=Math.PI*t0, p1=Math.PI*t1;
+      for(let j=0;j<nLong;j++){
+        const a0=2*Math.PI*j/nLong, a1=2*Math.PI*(j+1)/nLong;
+        const pt=(p,a)=>V(sx*Math.sin(p)*Math.cos(a), y0+sy*Math.cos(p), sz*Math.sin(p)*Math.sin(a));
+        f.push({v:[pt(p0,a0),pt(p1,a0),pt(p1,a1),pt(p0,a1)]});
+      }
+    }
+    return f;
+  }
+  function cyl(r,h,seg,axis='y',cx=0,cy=0,cz=0){
+    const f=[]; const y0=-h/2,y1=h/2;
+    const map=(ang,yy)=>{
+      let x=r*Math.cos(ang), z=r*Math.sin(ang), y=yy;
+      if(axis==='x'){ return V(cx+yy, cy+x, cz+z); }
+      if(axis==='z'){ return V(cx+x, cy+z, cz+yy); }
+      return V(cx+x, cy+yy, cz+z);
+    };
+    for(let j=0;j<seg;j++){
+      const a0=2*Math.PI*j/seg, a1=2*Math.PI*(j+1)/seg;
+      f.push({v:[map(a0,y0),map(a0,y1),map(a1,y1),map(a1,y0)]});
+      // caps
+      const c0=(axis==='x')?V(cx+y0,cy,cz):(axis==='z')?V(cx,cy,cz+y0):V(cx,cy+y0,cz);
+      const c1=(axis==='x')?V(cx+y1,cy,cz):(axis==='z')?V(cx,cy,cz+y1):V(cx,cy+y1,cz);
+      f.push({v:[c0,map(a1,y0),map(a0,y0)]});
+      f.push({v:[c1,map(a0,y1),map(a1,y1)]});
+    }
+    return f;
+  }
+  function box(w,h,d,cx=0,cy=0,cz=0){
+    const x=w/2,y=h/2,z=d/2;
+    const p=(a,b,c)=>V(cx+a,cy+b,cz+c);
+    const q=(A,B,C,D)=>({v:[A,B,C,D]});
+    return [
+      q(p(-x,-y, z),p(x,-y, z),p(x,y, z),p(-x,y, z)),
+      q(p(x,-y,-z),p(-x,-y,-z),p(-x,y,-z),p(x,y,-z)),
+      q(p(x,-y, z),p(x,-y,-z),p(x,y,-z),p(x,y, z)),
+      q(p(-x,-y,-z),p(-x,-y, z),p(-x,y, z),p(-x,y,-z)),
+      q(p(-x,y, z),p(x,y, z),p(x,y,-z),p(-x,y,-z)),
+      q(p(-x,-y,-z),p(x,-y,-z),p(x,-y, z),p(-x,-y, z)),
+    ];
+  }
+  // the star: a disc whose edge radius follows the breath curve
+  function camFaces(R0,A,th,seg){
+    const f=[]; const y0=-th/2,y1=th/2;
+    const rad=(j)=>{ const p=j/seg; return R0+A*breath(p); };
+    const pt=(j,yy)=>{ const a=2*Math.PI*j/seg, r=rad(j); return V(r*Math.cos(a),yy,r*Math.sin(a)); };
+    for(let j=0;j<seg;j++){
+      f.push({v:[pt(j,y0),pt(j,y1),pt(j+1,y1),pt(j+1,y0)]});      // side
+      f.push({v:[V(0,y0,0),pt(j+1,y0),pt(j,y0)]});                // bottom
+      f.push({v:[V(0,y1,0),pt(j,y1),pt(j+1,y1)]});                // top
+    }
+    return f;
+  }
+
+  // ---------- breath waveform: inhale 4 / hold 1 / exhale 6 ----------
+  const SMOOTH=(t)=>t*t*(3-2*t);
+  function breath(p){ // p 0..1 over one cycle -> level 0..1
+    const IN=4,HOLD=1,OUT=6, T=IN+HOLD+OUT; let s=p*T;
+    if(s<IN) return SMOOTH(s/IN);
+    if(s<IN+HOLD) return 1;
+    return 1-SMOOTH((s-IN-HOLD)/OUT);
+  }
+  function phaseName(p){
+    const IN=4,HOLD=1,OUT=6,T=IN+HOLD+OUT,s=p*T;
+    if(s<IN) return 'Inhale'; if(s<IN+HOLD) return 'Hold'; return 'Exhale';
+  }
+
+  // ---------- parts ----------
+  // materials: [r,g,b], alpha handled per-part in draw
+  const MAT={ shell:[120,127,138], motor:[74,78,86], shaft:[150,156,166],
+             cam:[188,194,204], follow:[150,156,166], plate:[168,174,184],
+             foam:[210,171,125], gel:[84,166,156], batt:[158,163,172],
+             base:[64,68,76] };
+
+  // assembly axis for the explode (mostly vertical), per part
+  const parts = [
+    { name:'base',  mat:'base',  faces: cyl(15,4,28,'y',0,-15,0), exp:V(0,-1,0) },
+    { name:'motor', mat:'motor', faces: cyl(5.5,13,20,'y',0,-7,0), exp:V(0,-1,0), label:'Motor', la:V(0,-7,6) },
+    { name:'batt',  mat:'batt',  faces: cyl(3.6,15,16,'x',0,-9,7).concat(cyl(3.6,15,16,'x',0,-9,-7)),
+                    exp:V(-1,-.3,0), label:'2×AAA', la:V(-12,-9,0) },
+    { name:'shaft', mat:'shaft', faces: cyl(1.3,9,10,'y',0,3,0), exp:V(0,0,0) },
+    { name:'cam',   mat:'cam',   faces: camFaces(7,3.6,3.6,54), rotY:true, exp:V(0,.15,0), label:'Cam — the breath shape', la:V(11,2,0) },
+    { name:'follow',mat:'plate', faces: box(11,2,11,0,0,0).concat(cyl(1.6,7,10,'y',0,-4,0)), lift:true, exp:V(0,1,0),
+                    label:'Follower (slip-clutch)', la:V(0,1,7) },
+    { name:'foam',  mat:'foam',  faces: sphereFaces(24,10,12.5,10,12.5,0,0,0.5), breatheP:true, exp:V(0,1.7,0),
+                    label:'Foam dome — breathes', la:V(0,9,0) },
+    { name:'gel',   mat:'gel',   faces: sphereFaces(20,10,8.5,7.5,8.5,0,0,1), exp:V(1,0,0),
+                    label:'Gel lobe — fidget', la:V(27,2,0) },
+    { name:'shell', mat:'shell', faces: sphereFaces(26,13,30,15.5,22), shell:true, exp:V(0,0,0) },
+  ];
+  // static base positions (added into faces at build for parts that aren't at origin)
+  const POS={ foam:V(0,13,0), gel:V(26,2,0) };
+  for(const p of parts){ const o=POS[p.name]; if(o){ p.faces=p.faces.map(f=>({v:f.v.map(v=>V(v.x+o.x,v.y+o.y,v.z+o.z))})); } }
+
+  // ---------- camera ----------
+  const cam={ yaw:-0.6, pitch:-0.42, dist:150, tx:0, ty:1, tz:0 };
+  let auto=true, playing=!reduce, cutaway=true, labels=true, explode=0, t0=performance.now()/1000, tPause=0, tAcc=0;
+
+  function rot(v){ // yaw about Y then pitch about X
+    const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw);
+    let x=v.x*cy+v.z*sy, z=-v.x*sy+v.z*cy, y=v.y;
+    const cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+    const y2=y*cp-z*sp, z2=y*sp+z*cp;
+    return V(x,y2,z2);
+  }
+  let W=0,H=0,DPR=1,F=0;
+  function resize(){
+    DPR=Math.min(devicePixelRatio||1,2);
+    W=innerWidth; H=innerHeight;
+    cv.width=W*DPR; cv.height=H*DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    F=Math.min(W,H)*0.9;
+  }
+  addEventListener('resize',resize); resize();
+
+  const light=norm(V(-0.35,0.85,0.45));
+  function shade(rgb,nc,alpha){
+    const d=Math.max(0,dot(nc,Lc));
+    const k=0.42+0.62*d;
+    const r=Math.min(255,rgb[0]*k)|0, g=Math.min(255,rgb[1]*k)|0, b=Math.min(255,rgb[2]*k)|0;
+    return 'rgba('+r+','+g+','+b+','+alpha+')';
+  }
+  let Lc=light;
+
+  function draw(now){
+    now=now/1000;
+    if(playing){ tAcc += now-t0; }
+    t0=now;
+    const period=8.0;                       // one breath, seconds (calm but lively)
+    const phase=(tAcc/period)%1;
+    const lvl=reduce?0.62:breath(phase);
+    if(auto && !dragging && !reduce){ cam.yaw += 0.0016; }
+
+    Lc=rot(light);
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle=getComputedStyle(document.body).backgroundColor;
+    ctx.fillRect(0,0,W,H);
+
+    const camAng = phase*2*Math.PI;
+    const lift = 5.2*lvl;                    // dome/follower travel
+    const polys=[];
+    for(const p of parts){
+      const rgb=MAT[p.mat];
+      const isShell=p.shell;
+      const alpha=isShell?(cutaway?0.16:0.96):1;
+      const ex=explode;
+      for(const f of p.faces){
+        // transform verts
+        const wv=f.v.map(v=>{
+          let x=v.x,y=v.y,z=v.z;
+          if(p.rotY){ const c=Math.cos(camAng),s=Math.sin(camAng); const nx=x*c+z*s, nz=-x*s+z*c; x=nx; z=nz; }
+          if(p.breatheP){ y=(y-13)*(1+0.14*lvl)+13+lift; }   // foam scales up from its base + lifts
+          if(p.lift){ y+=lift; }
+          // explode offset
+          x+=p.exp.x*ex*22; y+=p.exp.y*ex*22; z+=p.exp.z*ex*22;
+          return V(x,y,z);
+        });
+        // to camera space
+        const pc=wv.map(v=>{ const r=rot(V(v.x-cam.tx,v.y-cam.ty,v.z-cam.tz)); return V(r.x,r.y,r.z-cam.dist); });
+        // normal in camera space (used for shading; no backface cull so winding
+        // inconsistencies can never punch holes — depth sort resolves occlusion)
+        const nc=norm(cross(sub(pc[1],pc[0]),sub(pc[2],pc[0])));
+        const sn=nc.z<0?V(-nc.x,-nc.y,-nc.z):nc;             // two-sided: light the face we see
+        // project
+        let ok=true; const sp=pc.map(v=>{ const zz=-v.z; if(zz<1){ok=false;} return {x:W/2+F*v.x/zz, y:H/2-F*v.y/zz}; });
+        if(!ok) continue;
+        const zc=(pc.reduce((a,v)=>a+v.z,0))/pc.length;
+        polys.push({z:zc, sp, fill:shade(rgb,sn,alpha), stroke:isShell?'rgba(230,235,245,'+(cutaway?0.10:0.05)+')':'rgba(10,12,16,0.16)'});
+      }
+    }
+    polys.sort((a,b)=>a.z-b.z);              // far (more negative z) first
+    for(const q of polys){
+      ctx.beginPath(); ctx.moveTo(q.sp[0].x,q.sp[0].y);
+      for(let i=1;i<q.sp.length;i++) ctx.lineTo(q.sp[i].x,q.sp[i].y);
+      ctx.closePath(); ctx.fillStyle=q.fill; ctx.fill();
+      ctx.lineWidth=0.6; ctx.strokeStyle=q.stroke; ctx.stroke();
+    }
+
+    // labels (projected anchors)
+    if(labels){
+      ctx.font='11px ui-monospace,Menlo,monospace';
+      ctx.textBaseline='middle';
+      for(const p of parts){
+        if(!p.label) continue;
+        let a=p.la; let y=a.y;
+        if(p.lift) y+=lift; if(p.breatheP) y=(a.y-13)*(1+0.14*lvl)+13+lift;
+        let wx=a.x+p.exp.x*explode*22, wy=y+p.exp.y*explode*22, wz=a.z+p.exp.z*explode*22;
+        const r=rot(V(wx-cam.tx,wy-cam.ty,wz-cam.tz)); const pc=V(r.x,r.y,r.z-cam.dist);
+        const zz=-pc.z; if(zz<1) continue;
+        const sx=W/2+F*pc.x/zz, sy=H/2-F*pc.y/zz;
+        const right = sx < W/2;
+        const lx = right? sx+10 : sx-10;
+        ctx.fillStyle='rgba(236,238,242,0.85)';
+        ctx.strokeStyle='rgba(236,238,242,0.28)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.arc(sx,sy,2.3,0,7); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(lx,sy); ctx.stroke();
+        ctx.textAlign=right?'left':'right';
+        const tone = p.name==='foam'?'rgba(210,171,125,0.95)':p.name==='gel'?'rgba(84,166,156,0.98)':'rgba(236,238,242,0.9)';
+        ctx.fillStyle=tone;
+        ctx.fillText(p.label, right?lx+4:lx-4, sy);
+      }
+    }
+
+    document.getElementById('phase').textContent = reduce?'Paused':phaseName(phase);
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+
+  // ---------- interaction ----------
+  let dragging=false; const ptrs=new Map(); let lastPinch=0;
+  cv.addEventListener('pointerdown',e=>{ cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    dragging=true; auto=false; hideHint(); });
+  cv.addEventListener('pointermove',e=>{
+    if(!ptrs.has(e.pointerId)) return;
+    const prev=ptrs.get(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(ptrs.size===1){
+      cam.yaw += (e.clientX-prev.x)*0.008;
+      cam.pitch += (e.clientY-prev.y)*0.008;
+      cam.pitch=Math.max(-1.4,Math.min(1.4,cam.pitch));
+    } else if(ptrs.size===2){
+      const pts=[...ptrs.values()]; const d=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
+      if(lastPinch) cam.dist=Math.max(80,Math.min(280,cam.dist*(lastPinch/d)));
+      lastPinch=d;
+    }
+  });
+  const up=e=>{ ptrs.delete(e.pointerId); if(ptrs.size<2) lastPinch=0; if(ptrs.size===0) dragging=false; };
+  cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+  cv.addEventListener('wheel',e=>{ e.preventDefault(); cam.dist=Math.max(80,Math.min(280,cam.dist*(1+e.deltaY*0.0012))); hideHint(); },{passive:false});
+
+  // ---------- controls ----------
+  const $=id=>document.getElementById(id);
+  $('play').onclick=function(){ playing=!playing; this.textContent=playing?'Pause':'Play'; this.classList.toggle('on',playing); };
+  $('cut').onclick=function(){ cutaway=!cutaway; this.classList.toggle('on',cutaway); this.textContent=cutaway?'Cutaway':'Solid'; };
+  $('lab').onclick=function(){ labels=!labels; this.classList.toggle('on',labels); };
+  $('ex').oninput=function(){ explode=+this.value; if(explode>0.02){auto=false;} };
+  $('reset').onclick=function(){ cam.yaw=-0.6; cam.pitch=-0.42; cam.dist=150; auto=true; };
+  if(reduce){ $('play').textContent='Play'; $('play').classList.remove('on'); }
+  let hintT=setTimeout(hideHint,4200);
+  function hideHint(){ const h=$('hint'); if(h) h.style.opacity='0'; clearTimeout(hintT); }
+})();
+</script>

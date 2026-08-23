@@ -31,14 +31,20 @@ build. See [How big it is](#how-big-it-is) and the full shrink plan in
                                   [ push button ]  press = on/off
 ```
 
-## Start here
+## Start here — pick your version
 
-- **Never soldered? Build v1 first: [NOSOLDER.md](NOSOLDER.md).** Zero
-  soldering, USB-powered, ~$8, ~20 minutes. Everything pushes into a
-  breadboard. This is the recommended starting point.
-- **General walkthrough:** [ASSEMBLY.md](ASSEMBLY.md).
-- **Shrink it later (needs soldering):** [COMPACT.md](COMPACT.md) —
-  thumbnail size + battery + deep sleep, same board and firmware.
+- **Simplest, no code, wireless button: [BASIC.md](BASIC.md).** A ready-made
+  433 MHz keyfob + relay receiver toggles the laser from across the room.
+  No microcontroller, no app, no soldering (screw terminals). ~$18. **This
+  is the one to build if you just want a button-controlled laser.**
+- **Phone control, no soldering: [NOSOLDER.md](NOSOLDER.md).** Adds a tiny
+  ESP32-C3 so your phone/laptop controls it over Bluetooth. Breadboard +
+  USB, ~$8.
+- **General Bluetooth walkthrough:** [ASSEMBLY.md](ASSEMBLY.md).
+- **Shrink the Bluetooth build (needs soldering):** [COMPACT.md](COMPACT.md)
+  — thumbnail size + battery + deep sleep.
+
+The rest of this file describes the **Bluetooth** version.
 
 ## Parts
 

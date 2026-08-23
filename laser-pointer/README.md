@@ -34,9 +34,10 @@ build. See [How big it is](#how-big-it-is) and the full shrink plan in
 ## Start here — pick your version
 
 - **Simplest, no code, wireless button: [BASIC.md](BASIC.md).** A ready-made
-  433 MHz keyfob + relay receiver toggles the laser from across the room.
-  No microcontroller, no app, no soldering (screw terminals). ~$18. **This
-  is the one to build if you just want a button-controlled laser.**
+  433 MHz remote + relay receiver toggles the laser from across the room.
+  No microcontroller, no app, no soldering (screw terminals). ~$13 (reuses
+  AAs you own). **This is the one to build if you just want a
+  button-controlled laser.**
 - **Phone control, no soldering: [NOSOLDER.md](NOSOLDER.md).** Adds a tiny
   ESP32-C3 so your phone/laptop controls it over Bluetooth. Breadboard +
   USB, ~$8.
